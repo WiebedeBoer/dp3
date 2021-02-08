@@ -6,6 +6,9 @@ using Windows.UI.Xaml.Media;
 using Windows.UI.Xaml.Shapes;
 using Windows.UI.Input;
 using System.Collections.Generic;
+using System.Linq;
+using System.IO;
+using System.Text.RegularExpressions;
 
 namespace tekenprogramma
 {
@@ -13,11 +16,58 @@ namespace tekenprogramma
     public interface ICommand
     {
         void Execute();
+        void Undo();
+        void Redo();
     }
 
     //class commands
+    public class Invoker
+    {
+
+        private List<ICommand> actionsList = new List<ICommand>();
+        private List<ICommand> redoList = new List<ICommand>();
+
+        public Invoker()
+        {
+            this.actionsList = new List<ICommand>();
+            this.redoList = new List<ICommand>();
+
+        }
+
+        public void Execute(ICommand cmd)
+        {
+            actionsList.Add(cmd);
+            redoList.Clear();
+            cmd.Execute();
+        }
+
+        public void Undo()
+        {
+            if (actionsList.Count >= 1)
+            {
+                ICommand cmd = (ICommand)actionsList;
+                cmd.Undo();
+                actionsList.RemoveAt(0);
+                redoList.Add(cmd);
+            }
+        }
+
+        public void Redo()
+        {
+            if (redoList.Count >= 1)
+            {
+                ICommand cmd = (ICommand)redoList;
+                cmd.Redo();
+                redoList.RemoveAt(0);
+                actionsList.Add(cmd);
+            }
+        }
+
+    }
+
     public class Commands
     {
+
         private double cpx;
         private double cpy;
         private double top;
@@ -25,13 +75,15 @@ namespace tekenprogramma
 
         Rectangle backuprectangle; //rectangle shape
         Ellipse backupellipse; //ellipse shape
-
         string type = "Rectangle"; //default shape
+        bool moving = false;
 
         private List<ICommand> actionsList = new List<ICommand>();
         private List<ICommand> redoList = new List<ICommand>();
 
-        bool moving = false;
+        //file IO
+        private List<String> lines = new List<String>();
+        string path = @"c:\temp\MyTest.txt";
 
         //give smallest
         public double ReturnSmallest(double first, double last)
@@ -46,9 +98,38 @@ namespace tekenprogramma
             }
         }
 
-        //create rectangle
-        public void MakeRectangle()
+        //rectangle
+        public void PlaceRectangle(object sender, PointerRoutedEventArgs e)
         {
+            FrameworkElement backupprep = e.OriginalSource as FrameworkElement;
+            if (backupprep.Name == "Rectangle")
+            {
+                Rectangle tmp = backupprep as Rectangle;
+                backuprectangle = tmp;
+                type = "Rectangle";
+            }
+            else if (backupprep.Name == "Ellipse")
+            {
+                Ellipse tmp = backupprep as Ellipse;
+                backupellipse = tmp;
+                type = "Ellipse";
+            }
+        }
+
+        public void undoPlaceRectangle()
+        {
+
+        }
+
+        public void redoPlaceRectangle()
+        {
+
+        }
+
+
+        public void MakeRectangle(double left, double top, Canvas paintSurface)
+        {
+
             Rectangle newRectangle = new Rectangle(); //instance of new rectangle shape
             newRectangle.Height = Math.Abs(cpy - top); //set height
             newRectangle.Width = Math.Abs(cpx - left); //set width
@@ -58,11 +139,52 @@ namespace tekenprogramma
             newRectangle.Name = "Rectangle"; //attach name
             Canvas.SetLeft(newRectangle, ReturnSmallest(left, cpx)); //set left position
             Canvas.SetTop(newRectangle, ReturnSmallest(top, cpy)); //set top position 
+            //newRectangle.PointerPressed += Drawing_pressed;
+            paintSurface.Children.Add(newRectangle);
+            //Rectangle.Content = paintSurface.Children[0].Opacity;
         }
 
-        //create ellipse
-        public void MakeEllipse()
+        public void undoRectangle()
         {
+
+        }
+
+        public void redoRectangle()
+        {
+
+        }
+
+        //ellipse
+        public void PlaceEllipse(object sender, PointerRoutedEventArgs e)
+        {
+            FrameworkElement backupprep = e.OriginalSource as FrameworkElement;
+            if (backupprep.Name == "Rectangle")
+            {
+                Rectangle tmp = backupprep as Rectangle;
+                backuprectangle = tmp;
+                type = "Rectangle";
+            }
+            else if (backupprep.Name == "Ellipse")
+            {
+                Ellipse tmp = backupprep as Ellipse;
+                backupellipse = tmp;
+                type = "Ellipse";
+            }
+        }
+
+        public void undoPlaceEllipse()
+        {
+
+        }
+
+        public void redoPlaceEllipse()
+        {
+
+        }
+
+        public void MakeEllipse(double left, double top, Canvas paintSurface)
+        {
+
             Ellipse newEllipse = new Ellipse(); //instance of new ellipse shape
             newEllipse.Height = Math.Abs(cpy - top);//set height
             newEllipse.Width = Math.Abs(cpx - left);//set width
@@ -72,8 +194,21 @@ namespace tekenprogramma
             newEllipse.Name = "Ellipse";//attach name
             Canvas.SetLeft(newEllipse, ReturnSmallest(left, cpx));//set left position
             Canvas.SetTop(newEllipse, ReturnSmallest(top, cpy));//set top position
+            //newEllipse.PointerPressed += Drawing_pressed;
+            paintSurface.Children.Add(newEllipse);
         }
 
+        public void undoEllipse()
+        {
+
+        }
+
+        public void redoEllipse()
+        {
+
+        }
+
+        /*
         //undo
         public void Undo()
         {
@@ -91,9 +226,10 @@ namespace tekenprogramma
             actionsList.Add(lastcommand); //add to undo list
             redoList.RemoveAt(LastInList); //remove from redo list
         }
+        */
 
         //resize
-        public void Resize()
+        public void Resize(Canvas paintSurface)
         {
             //if rectangle
             if (type == "Rectangle")
@@ -105,6 +241,8 @@ namespace tekenprogramma
                 Rectangle selRect = new Rectangle();
                 backuprectangle.Height = Convert.ToDouble(selRect.Height); //set width
                 backuprectangle.Width = Convert.ToDouble(selRect.Width); //set height
+                paintSurface.Children.Remove(backuprectangle);
+                paintSurface.Children.Add(backuprectangle);
 
             }
             //else if ellipse
@@ -117,13 +255,26 @@ namespace tekenprogramma
                 Ellipse selEllipse = new Ellipse();
                 backupellipse.Height = Convert.ToDouble(selEllipse.Height); //set width
                 backupellipse.Width = Convert.ToDouble(selEllipse.Width); //set height
-
+                paintSurface.Children.Remove(backupellipse);
+                paintSurface.Children.Add(backupellipse);
             }
         }
 
-        //moving
-        public void Moving()
+        public void undoResize()
         {
+
+        }
+
+        public void redoResize()
+        {
+
+        }
+
+        //moving
+        public void Moving(object sender, PointerRoutedEventArgs e, Canvas paintSurface)
+        {
+
+            /*
             //cpx = e.GetCurrentPoint(paintSurface).Position.X; //x coordinate canvas
             //cpy = e.GetCurrentPoint(paintSurface).Position.Y; //y coordinate canvas
             //double top = Canvas.GetTop(c as FrameworkElement);
@@ -143,21 +294,105 @@ namespace tekenprogramma
                 //paintSurface.Children.Add(backupellipse); //add the new backup shape
             }
             moving = !moving;
+            */
+
+            cpx = e.GetCurrentPoint(paintSurface).Position.X;
+            cpy = e.GetCurrentPoint(paintSurface).Position.Y;
+            if (type == "Rectangle")
+            {
+                Canvas.SetLeft(backuprectangle, cpx);
+                Canvas.SetTop(backuprectangle, cpy);
+                paintSurface.Children.Remove(backuprectangle);
+                paintSurface.Children.Add(backuprectangle);
+            }
+            else if (type == "Ellipse")
+            {
+                Canvas.SetLeft(backupellipse, cpx);
+                Canvas.SetTop(backupellipse, cpy);
+                paintSurface.Children.Remove(backupellipse);
+                paintSurface.Children.Add(backupellipse);
+            }
+            moving = !moving;
         }
 
-        public void Saving()
+        public void undoMoving()
         {
 
         }
 
+        public void redoMoving()
+        {
+
+        }
+
+        //saving
+        public void Saving()
+        {
+            if (!File.Exists(path))
+            {
+                // Create a file to write to.
+                File.WriteAllLines(path, lines);
+            }
+        }
+
+        //loading
         public void Loading()
+        {
+
+            string[] readText = File.ReadAllLines(path);
+            foreach (string s in readText)
+            {
+                string[] line = Regex.Split(s, "\\s+");
+                if (line[0] == "Ellipse")
+                {
+                    this.GetEllipse(s);
+                }
+                else
+                {
+                    this.GetRectangle(s);
+                }
+            }
+        }
+
+        public Ellipse GetEllipse(String lines)
+        {
+            string[] line = Regex.Split(lines, "\\s+");
+            Ellipse shape = new Ellipse();
+
+            Canvas.SetLeft(shape, Convert.ToInt32(line[1]));
+            Canvas.SetTop(shape, Convert.ToInt32(line[2]));
+            shape.Width = Convert.ToInt32(line[3]);
+            shape.Height = Convert.ToInt32(line[4]);
+
+            return shape;
+        }
+
+        public Rectangle GetRectangle(String lines)
+        {
+            string[] line = Regex.Split(lines, "\\s+");
+            Rectangle shape = new Rectangle();
+
+            Canvas.SetLeft(shape, Convert.ToInt32(line[1]));
+            Canvas.SetTop(shape, Convert.ToInt32(line[2]));
+            shape.Width = Convert.ToInt32(line[3]);
+            shape.Height = Convert.ToInt32(line[4]);
+
+            return shape;
+        }
+
+        public void Selecting()
+        {
+
+        }
+
+        public void Unselecting()
         {
 
         }
 
     }
 
-
+    /*
     //class undo
     public class Undo : ICommand
     {
@@ -189,21 +424,38 @@ namespace tekenprogramma
             mycommand.Redo();
         }
     }
+    */
 
 
     //class moving
     public class Moving : ICommand
     {
+        private Invoker invoker;
         private Commands mycommand;
+        private object sender;
+        private PointerRoutedEventArgs e;
+        private Canvas paintSurface;
 
-        public Moving(Commands mycommand)
+        public Moving(Invoker invoker, object sender, PointerRoutedEventArgs e)
         {
-            this.mycommand = mycommand;
+            this.invoker = invoker;
+            this.sender = sender;
+            this.e = e;
         }
 
         public void Execute()
         {
-            mycommand.Moving();
+            mycommand.Moving(sender, e, paintSurface);
+        }
+
+        public void Undo()
+        {
+            mycommand.undoMoving();
+        }
+
+        public void Redo()
+        {
+            mycommand.redoMoving();
         }
     }
 
@@ -211,77 +463,215 @@ namespace tekenprogramma
     public class Resize : ICommand
     {
         private Commands mycommand;
+        private Canvas paintSurface;
 
-        public Resize(Commands mycommand)
+        public Resize(Commands mycommand, Canvas paintSurface)
         {
             this.mycommand = mycommand;
+            this.paintSurface = paintSurface;
         }
 
         public void Execute()
         {
-            mycommand.Resize();
+            mycommand.Resize(paintSurface);
+        }
+
+        public void Undo()
+        {
+            mycommand.undoResize();
+        }
+
+        public void Redo()
+        {
+            mycommand.redoResize();
+        }
+    }
+
+    //class place rectangle
+    public class PlaceRectangles : ICommand
+    {
+        private Invoker invoker;
+        private Commands mycommand;
+        private object sender;
+        private PointerRoutedEventArgs e;
+
+
+        /*
+        public PlaceRectangles(Invoker invoker, Commands mycommand)
+        {
+            this.invoker = invoker;
+            this.mycommand = mycommand;
+        }
+        */
+
+        public PlaceRectangles(Invoker invoker, object sender, PointerRoutedEventArgs e)
+        {
+            this.invoker = invoker;
+            this.sender = sender;
+            this.e = e;
+        }
+
+        public void Execute()
+        {
+            mycommand.PlaceRectangle(sender, e);
+        }
+
+        public void Undo()
+        {
+            mycommand.undoPlaceRectangle();
+        }
+
+        public void Redo()
+        {
+            mycommand.redoPlaceRectangle();
         }
     }
 
     //class make rectangle
     public class MakeRectangles : ICommand
     {
+        private Invoker invoker;
         private Commands mycommand;
+        private Canvas paintSurface;
+        private double left;
+        private double top;
 
-        public MakeRectangles(Commands mycommand)
+        public MakeRectangles(double left, double top, Canvas paintSurface)
         {
             this.mycommand = mycommand;
+            this.left = left;
+            this.top = top;
+            this.paintSurface = paintSurface;
         }
 
         public void Execute()
         {
-            mycommand.MakeRectangle();
+            mycommand.MakeRectangle(left, top, paintSurface);
+        }
+
+        public void Undo()
+        {
+            mycommand.undoRectangle();
+        }
+
+        public void Redo()
+        {
+            mycommand.redoRectangle();
         }
     }
 
     //class make ellipse
     public class MakeEllipses : ICommand
     {
+        private Invoker invoker;
+        private Commands mycommand;
+        private Canvas paintSurface;
+        private double left;
+        private double top;
+
+        public MakeEllipses(double left, double top, Canvas paintSurface)
+        {
+            this.mycommand = mycommand;
+            this.left = left;
+            this.top = top;
+            this.paintSurface = paintSurface;
+        }
+
+        public void Execute()
+        {
+            mycommand.MakeEllipse(left, top, paintSurface);
+        }
+
+        public void Undo()
+        {
+            mycommand.undoEllipse();
+        }
+
+        public void Redo()
+        {
+            mycommand.redoEllipse();
+        }
+    }
+
+    //class place ellipse
+    public class PlaceEllipses : ICommand
+    {
+        private Invoker invoker;
+        private Commands mycommand;
+        private object sender;
+        private PointerRoutedEventArgs e;
+
+        public PlaceEllipses(Invoker invoker, object sender, PointerRoutedEventArgs e)
+        {
+            this.invoker = invoker;
+            this.sender = sender;
+            this.e = e;
+        }
+
+        public void Execute()
+        {
+            mycommand.PlaceEllipse(sender, e);
+        }
+
+        public void Undo()
+        {
+            mycommand.undoPlaceEllipse();
+        }
+
+        public void Redo()
+        {
+            mycommand.redoPlaceEllipse();
+        }
+    }
+
+    //class saving
+    public class Saved : ICommand
+    {
         private Commands mycommand;
 
-        public MakeEllipses(Commands mycommand)
+        public Saved()
         {
             this.mycommand = mycommand;
         }
 
         public void Execute()
         {
-            mycommand.MakeEllipse();
-        }
-    }
-
-    public class Saved : ICommand
-    {
-        private Commands mycommmand;
-
-        public Saved(Commands mycommand)
-        {
-            this.mycommmand = mycommmand;
-        }
-
-        public void Execute()
-        {
             mycommand.Saving();
+        }
+
+        public void Undo()
+        {
+            //mycommand.Saving();
+        }
+
+        public void Redo()
+        {
+            //mycommand.Saving();
         }
     }
 
     public class Loaded : ICommand
     {
-        private Commands mycommmand;
+        private Commands mycommand;
 
-        public Loaded(Commands mycommand)
+        public Loaded()
         {
-            this.mycommmand = mycommmand;
+            this.mycommand = mycommand;
         }
 
         public void Execute()
         {
             mycommand.Loading();
+        }
+
+        public void Undo()
+        {
+            //mycommand.Loading();
+        }
+
+        public void Redo()
+        {
+            //mycommand.Loading();
         }
     }
 }

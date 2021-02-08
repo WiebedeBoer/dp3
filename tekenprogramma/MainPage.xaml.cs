@@ -18,6 +18,8 @@ namespace tekenprogramma
         Rectangle backuprectangle;
         Ellipse backupellipse;
 
+        public Invoker invoker = new Invoker();
+
         public MainPage()
         {
             InitializeComponent();
@@ -26,20 +28,35 @@ namespace tekenprogramma
         private void Drawing_pressed(object sender, PointerRoutedEventArgs e)
         {
             FrameworkElement backupprep = e.OriginalSource as FrameworkElement;
+
             if (backupprep.Name == "Rectangle")
             {
+                /*
                 Rectangle tmp = backupprep as Rectangle;
                 backuprectangle = tmp;
                 type = "Rectangle";
+                */
+
+
+                ICommand place = new PlaceRectangles(invoker, sender, e);
+                invoker.Execute(place);
+
+
             }
-            else if(backupprep.Name == "Ellipse")
+            else if (backupprep.Name == "Ellipse")
             {
+                /*
                 Ellipse tmp = backupprep as Ellipse;
                 backupellipse = tmp;
                 type = "Ellipse";
+                */
+
+                ICommand place = new PlaceEllipses(invoker, sender, e);
+                invoker.Execute(place);
             }
             if (moving)
             {
+                /*
                 cpx = e.GetCurrentPoint(paintSurface).Position.X;
                 cpy = e.GetCurrentPoint(paintSurface).Position.Y;
                 if (type == "Rectangle")
@@ -57,6 +74,9 @@ namespace tekenprogramma
                     paintSurface.Children.Add(backupellipse);
                 }
                 moving = !moving;
+                */
+                ICommand place = new Moving(invoker, sender, e);
+                invoker.Execute(place);
             }
             else
             {
@@ -82,6 +102,7 @@ namespace tekenprogramma
 
         public void MakeRectangle(double left, double top)
         {
+            /*
             Rectangle newRectangle = new Rectangle();
             newRectangle.Height = Math.Abs(cpy - top);
             newRectangle.Width = Math.Abs(cpx - left);
@@ -94,10 +115,14 @@ namespace tekenprogramma
             newRectangle.PointerPressed += Drawing_pressed;
             paintSurface.Children.Add(newRectangle);
             Rectangle.Content = paintSurface.Children[0].Opacity;
+            */
+            ICommand place = new MakeRectangles(left, top, paintSurface);
+            invoker.Execute(place);
         }
 
         public void MakeEllipse(double left, double top)
         {
+            /*
             Ellipse newEllipse = new Ellipse();
             newEllipse.Height = Math.Abs(cpy - top);
             newEllipse.Width = Math.Abs(cpx - left);
@@ -109,8 +134,11 @@ namespace tekenprogramma
             Canvas.SetTop(newEllipse, ReturnSmallest(top, cpy));
             newEllipse.PointerPressed += Drawing_pressed;
             paintSurface.Children.Add(newEllipse);
+            */
+            ICommand place = new MakeEllipses(left, top, paintSurface);
+            invoker.Execute(place);
         }
-        
+
         private void Move_Click(object sender, RoutedEventArgs e)
         {
             moving = !moving;
@@ -134,7 +162,7 @@ namespace tekenprogramma
 
         public double ReturnSmallest(double first, double last)
         {
-            if(first < last)
+            if (first < last)
             {
                 return first;
             }
@@ -187,13 +215,15 @@ namespace tekenprogramma
         //save
         private void Save_Click(object sender, RoutedEventArgs e)
         {
-
+            ICommand place = new Saved();
+            invoker.Execute(place);
         }
 
         //load
         private void Load_Click(object sender, RoutedEventArgs e)
         {
-
+            ICommand place = new Loaded();
+            invoker.Execute(place);
         }
 
         //resize
@@ -209,7 +239,7 @@ namespace tekenprogramma
         {
 
         }
-        
+
         private void Height_TextChanged(object sender, TextChangedEventArgs e)
         {
 
