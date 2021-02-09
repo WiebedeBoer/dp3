@@ -83,7 +83,8 @@ namespace tekenprogramma
 
         //file IO
         private List<String> lines = new List<String>();
-        string path = @"c:\temp\MyTest.txt";
+        //string path = @"c:\temp\MyTest.txt";
+        string path = Directory.GetCurrentDirectory();
 
         //give smallest
         public double ReturnSmallest(double first, double last)
@@ -326,10 +327,29 @@ namespace tekenprogramma
         }
 
         //saving
-        public void Saving()
+        public void Saving(Canvas paintSurface)
         {
             if (!File.Exists(path))
             {
+                foreach (FrameworkElement child in paintSurface.Children)
+                {
+                    if (child is Rectangle)
+                    {
+                        double top = (double)child.GetValue(Canvas.TopProperty);
+                        double left = (double)child.GetValue(Canvas.LeftProperty);
+                        string str = "rectangle " + left + " " + top + " " + child.Width + " " + child.Height + "\n";
+                        //string str = "rectangle " + child.Width + " " + child.Height + "\n";
+                        lines.Add(str);
+                    }
+                    else
+                    {
+                        double top = (double)child.GetValue(Canvas.TopProperty);
+                        double left = (double)child.GetValue(Canvas.LeftProperty);
+                        string str = "ellipse " + left + " " + top + " " + child.Width + " " + child.Height + "\n";
+                        //string str = "ellipse " + child.Width + " " + child.Height + "\n";
+                        lines.Add(str);
+                    }
+                }
                 // Create a file to write to.
                 File.WriteAllLines(path, lines);
             }
