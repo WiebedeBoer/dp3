@@ -356,22 +356,25 @@ namespace tekenprogramma
         }
 
         //loading
-        public void Loading()
+        public Canvas Loading(Canvas paintSurface)
         {
-
+            
             string[] readText = File.ReadAllLines(path);
             foreach (string s in readText)
             {
                 string[] line = Regex.Split(s, "\\s+");
                 if (line[0] == "Ellipse")
                 {
-                    this.GetEllipse(s);
+                    Ellipse ellipse = this.GetEllipse(s);
+                    paintSurface.Children.Add(ellipse);
                 }
                 else
                 {
-                    this.GetRectangle(s);
+                    Rectangle rectangle = this.GetRectangle(s);
+                    paintSurface.Children.Add(rectangle);
                 }
             }
+            return paintSurface;
         }
 
         public Ellipse GetEllipse(String lines)
@@ -406,6 +409,21 @@ namespace tekenprogramma
         }
 
         public void Unselecting()
+        {
+
+        }
+
+        public void Group(object sender, RoutedEventArgs e, Canvas paintSurface)
+        {
+
+        }
+
+        public void undoGroup()
+        {
+
+        }
+
+        public void redoGroup()
         {
 
         }
@@ -648,15 +666,17 @@ namespace tekenprogramma
     public class Saved : ICommand
     {
         private Commands mycommand;
+        private Canvas paintSurface;
 
-        public Saved()
+        public Saved(Canvas paintSurface)
         {
             this.mycommand = mycommand;
+            this.paintSurface = paintSurface;
         }
 
         public void Execute()
         {
-            mycommand.Saving();
+            mycommand.Saving(paintSurface);
         }
 
         public void Undo()
@@ -673,15 +693,17 @@ namespace tekenprogramma
     public class Loaded : ICommand
     {
         private Commands mycommand;
+        private Canvas paintSurface;
 
-        public Loaded()
+        public Loaded(Canvas paintSurface)
         {
             this.mycommand = mycommand;
+            this.paintSurface = paintSurface;
         }
 
         public void Execute()
         {
-            mycommand.Loading();
+            mycommand.Loading(paintSurface);
         }
 
         public void Undo()
@@ -694,4 +716,38 @@ namespace tekenprogramma
             //mycommand.Loading();
         }
     }
+
+    //class moving
+    public class Grouping : ICommand
+    {
+        private Invoker invoker;
+        private Commands mycommand;
+        private object sender;
+        private PointerRoutedEventArgs e;
+        private Canvas paintSurface;
+
+        public Grouping(object sender, RoutedEventArgs e, Canvas paintSurface)
+        {
+            this.invoker = invoker;
+            this.sender = sender;
+            this.e = e;
+        }
+
+        public void Execute()
+        {
+            mycommand.Group(sender, e, paintSurface);
+        }
+
+        public void Undo()
+        {
+            mycommand.undoGroup();
+        }
+
+        public void Redo()
+        {
+            mycommand.redoGroup();
+        }
+    }
+
+
 }
