@@ -77,6 +77,7 @@ namespace tekenprogramma
         Ellipse backupellipse; //ellipse shape
         string type = "Rectangle"; //default shape
         bool moving = false;
+        bool grouping = false;
 
         private List<ICommand> actionsList = new List<ICommand>();
         private List<ICommand> redoList = new List<ICommand>();
@@ -403,8 +404,21 @@ namespace tekenprogramma
             return shape;
         }
 
-        public void Selecting()
+        public void Selecting(object sender, RoutedEventArgs e, Canvas paintSurface)
         {
+           
+            if(grouping == true)
+            {
+                double x = (double)paintSurface.GetValue(Canvas.LeftProperty);
+                double y = (double)paintSurface.GetValue(Canvas.TopProperty);
+                double width = 0;
+                double height = 0;
+                int depth = 0;
+                int id = 0;
+
+                Group group = new Group(height, width, x, y, type, depth, id);
+                group.AddGroup(group);
+            }
 
         }
 
@@ -424,11 +438,13 @@ namespace tekenprogramma
 
             Group group = new Group(height, width, x, y, type, depth, id);
             group.AddGroup(group);
+
+            grouping = true;
         }
 
         public void undoGroup()
         {
-
+            grouping = false;
         }
 
         public void redoGroup()
