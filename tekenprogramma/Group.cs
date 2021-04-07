@@ -270,7 +270,8 @@ namespace tekenprogramma
 
                     if (baseshape.getHandleIfSelected(e.GetCurrentPoint(paintSurface).Position.X, e.GetCurrentPoint(paintSurface).Position.Y))
                     {
-                        ICommand resize = new Resize(shape, e, paintSurface, this.invoker, this.element);
+                        Location location = new Location(e.GetCurrentPoint(paintSurface).Position.X, e.GetCurrentPoint(paintSurface).Position.Y, 0,0);
+                        ICommand resize = new Resize(shape, this.invoker, e, location, paintSurface, this.element);
                         this.invoker.Execute(resize);
                     }
                 }

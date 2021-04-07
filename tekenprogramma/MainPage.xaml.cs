@@ -25,6 +25,7 @@ namespace tekenprogramma
         public Invoker invoker = new Invoker();
         public List<Shape> selectedShapesList = new List<Shape>();
         public FrameworkElement selectedElement;
+        public List<FrameworkElement> selectedElements = new List<FrameworkElement>();
         public List<FrameworkElement> selectElementsList = new List<FrameworkElement>();
 
         public MainPage()
@@ -50,77 +51,71 @@ namespace tekenprogramma
         //grouped
         private void non_grouped(object sender, PointerRoutedEventArgs e)
         {
-            //selecting false
+            //selecting modus
             if (selecting == false)
             {
-                //select shapes
-                FrameworkElement backupprep = e.OriginalSource as FrameworkElement;
-                if (backupprep.Name == "Rectangle")
+                selectedElement = e.OriginalSource as FrameworkElement;
+                //canvas elements
+                if (selectedElement.Name == "Rectangle")
                 {
-                    Rectangle tmp = backupprep as Rectangle;
-                    backuprectangle = tmp;
-                    double top = (double)tmp.GetValue(Canvas.TopProperty);
-                    double left = (double)tmp.GetValue(Canvas.LeftProperty);
-                    double width = tmp.Width;
-                    double height = tmp.Height;
-                    Shape shape = new Shape(left, top, width, height);
-                    ICommand select = new Select(shape, e);
-                    this.invoker.Execute(select);
-                    //selecting = true;
-                    selectedShapesList.Add(shape);
-                    selectedElement = tmp;
-                    selectElementsList.Add(selectedElement);
+                    selecting = true;
+                    selectedElement.Opacity = 0.6; //fill opacity
+                    selectedElements.Add(selectedElement);
                 }
-                else if (backupprep.Name == "Ellipse")
+                else if (selectedElement.Name == "Ellipse")
                 {
-                    Ellipse tmp = backupprep as Ellipse;
-                    backupellipse = tmp;
-                    double top = (double)tmp.GetValue(Canvas.TopProperty);
-                    double left = (double)tmp.GetValue(Canvas.LeftProperty);
-                    double width = tmp.Width;
-                    double height = tmp.Height;
-                    Shape shape = new Shape(left, top, width, height);
-                    ICommand select = new Select(shape, e);
-                    this.invoker.Execute(select);
-                    //selecting = true;
-                    selectedShapesList.Add(shape);
-                    selectedElement = tmp;
-                    selectElementsList.Add(selectedElement);
+                    selecting = true;
+                    selectedElement.Opacity = 0.6; //fill opacity
+                    selectedElements.Add(selectedElement);
                 }
+                //not canvas elements
                 else
                 {
+                    selecting = false;
+                    //move
+                    if (type == "Move")
+                    {
+                        MovingShape(sender, e);
+                    }
+                    //resize
+                    else if (type == "Resize")
+                    {
+                        ResizingShape(sender, e);
+                    }
                     //make shapes
-                    if (type == "Rectangle")
+                    else if (type == "Rectangle")
                     {
                         MakeRectangle(sender, e);
-                        selectElementsList.Clear();
                     }
                     else if (type == "Elipse")
                     {
                         MakeEllipse(sender, e);
-                        selectElementsList.Clear();
                     }
                 }
             }
-            //selecting true
+            //not selecting modus
             else
             {
-
+                selecting = false;
                 //move
                 if (type == "Move")
                 {
-                    movingShape(sender, e);
-                    selectElementsList.Clear();
+                    MovingShape(sender, e);
                 }
                 //resize
                 else if (type == "Resize")
                 {
-                    resizingShape(sender, e);
-                    selectElementsList.Clear();
+                    ResizingShape(sender, e);
                 }
-
-
-
+                //make
+                else if (type == "Rectangle")
+                {
+                    MakeRectangle(sender, e);
+                }
+                else if (type == "Elipse")
+                {
+                    MakeEllipse(sender, e);
+                }
             }
         }
 
@@ -172,13 +167,13 @@ namespace tekenprogramma
                 //move
                 if (type == "Move")
                 {
-                    movingGroup(sender, e);
+                    MovingGroup(sender, e);
                     selectElementsList.Clear();
                 }
                 //resize
                 else if (type == "Resize")
                 {
-                    resizingGroup(sender, e);
+                    ResizingGroup(sender, e);
                     selectElementsList.Clear();
                 }
 
@@ -202,34 +197,37 @@ namespace tekenprogramma
         }
 
         //moving shape
-        private void movingShape(object sender, PointerRoutedEventArgs e)
+        private void MovingShape(object sender, PointerRoutedEventArgs e)
         {
-            Shape shape = selectedShapesList.First();
-            ICommand place = new Moving(shape, e, paintSurface, invoker, selectedElement);
+            Location location = new Location();
+            location.x = e.GetCurrentPoint(paintSurface).Position.X;
+            location.y = e.GetCurrentPoint(paintSurface).Position.Y;
+            location.width = selectedElement.Width;
+            location.height = selectedElement.Height;
+            Shape shape = new Shape(location.x, location.y, location.width, location.height);
+            ICommand place = new Moving(shape, invoker, location, paintSurface, selectedElement);
             this.invoker.Execute(place);
-            type = "deselecting";
-            selecting = false;
-            selectedShapesList.RemoveAt(0);
-            selectedElement = null;
         }
 
         //resizing shape
-        private void resizingShape(object sender, PointerRoutedEventArgs e)
+        private void ResizingShape(object sender, PointerRoutedEventArgs e)
         {
-            Shape shape = selectedShapesList.First();
-            ICommand place = new Resize(shape, e, paintSurface, invoker, selectedElement);
+            Location location = new Location();
+            location.x = e.GetCurrentPoint(paintSurface).Position.X;
+            location.y = e.GetCurrentPoint(paintSurface).Position.Y;
+            location.width = selectedElement.Width;
+            location.height = selectedElement.Height;
+            Shape shape = new Shape(location.x, location.y, location.width, location.height);
+            ICommand place = new Resize(shape, invoker, e, location, paintSurface, selectedElement);
             this.invoker.Execute(place);
-            type = "deselecting";
-            selecting = false;
-            selectedShapesList.RemoveAt(0);
-            selectedElement = null;
         }
 
         //moving group
-        private void movingGroup(object sender, PointerRoutedEventArgs e)
+        private void MovingGroup(object sender, PointerRoutedEventArgs e)
         {
             Shape shape = selectedShapesList.First();
-            ICommand place = new Moving(shape, e, paintSurface, invoker, selectedElement);
+            Group group = new Group(0,0,0,0,"group",0,0,paintSurface,invoker,selectedElement);
+            ICommand place = new MoveGroup(group, e, paintSurface, invoker, selectedElement);
             this.invoker.Execute(place);
             type = "deselecting";
             selecting = false;
@@ -238,10 +236,11 @@ namespace tekenprogramma
         }
 
         //resizing group
-        private void resizingGroup(object sender, PointerRoutedEventArgs e)
+        private void ResizingGroup(object sender, PointerRoutedEventArgs e)
         {
             Shape shape = selectedShapesList.First();
-            ICommand place = new Resize(shape, e, paintSurface, invoker, selectedElement);
+            Group group = new Group(0, 0, 0, 0, "group", 0, 0, paintSurface, invoker, selectedElement);
+            ICommand place = new ResizeGroup(group, e, paintSurface, invoker, selectedElement);
             this.invoker.Execute(place);
             type = "deselecting";
             selecting = false;
