@@ -46,14 +46,14 @@ namespace tekenprogramma
         public int depth;
         public int id;
         //public List<Baseshape> groupitems;
-        public Canvas paintSurface;
+        public Canvas selectedCanvas;
 
         public List<Baseshape> children = new List<Baseshape>();
 
         public Invoker invoker;
         public FrameworkElement element;
 
-        public Group(double height, double width, double x, double y, string type, int depth, int id, Canvas paintSurface, Invoker invoker, FrameworkElement element) : base(height, width, x, y)
+        public Group(double height, double width, double x, double y, string type, int depth, int id, Canvas selectedCanvas, Invoker invoker, FrameworkElement element) : base(height, width, x, y)
         {
             this.height = height;
             this.width = width;
@@ -62,27 +62,138 @@ namespace tekenprogramma
             this.type = type;
             this.depth = depth;
             this.id = id;
-            this.paintSurface = paintSurface;
+            this.selectedCanvas = selectedCanvas;
             this.invoker = invoker;
             this.element = element;
         }
 
-        public void add(Baseshape newgroup)
+        //make new group
+        public void MakeGroup(Group group, Canvas selectedCanvas, Invoker invoker)
+        {
+            Canvas grid = new Canvas();
+            SolidColorBrush groupbrush = new SolidColorBrush(); //brush
+            groupbrush.Color = Windows.UI.Colors.Yellow; //standard brush color is blue
+            groupbrush.Opacity = 0.5; //half opacity
+            grid.Background = groupbrush;
+            //size calculation
+            double lowestLeft = 1000;
+            double lowestTop = 1000;
+            double highestLeft = 0;
+            double highestTop = 0;
+            double highestWidth = 0;
+            double highestHeight = 0;
+            //get selected elements
+            foreach (FrameworkElement elm in invoker.selectElementsList)
+            {
+                double top = (double)elm.GetValue(Canvas.TopProperty);
+                double left = (double)elm.GetValue(Canvas.LeftProperty);
+                double width = elm.Width;
+                double height = elm.Height;
+                Group selectedgroup = new Group(left, top, width, height, elm.Name, 0, 0, selectedCanvas, invoker, elm);
+                group.Add(selectedgroup);
+                //re add elements
+                if (elm.Name == "Ellipse")
+                {
+                    Ellipse newEllipse = new Ellipse(); //instance of new ellipse shape
+                    newEllipse.Width = width;
+                    newEllipse.Height = height;
+                    SolidColorBrush elmbrush = new SolidColorBrush();//brush
+                    elmbrush.Color = Windows.UI.Colors.Yellow;//standard brush color is blue
+                    newEllipse.Fill = elmbrush;//fill color
+                    newEllipse.Name = "Ellipse";//attach name
+                    Canvas.SetLeft(newEllipse, left);//set left position
+                    Canvas.SetTop(newEllipse, top);//set top position
+                    grid.Children.Add(newEllipse);
+                }
+                else if (elm.Name == "Rectangle")
+                {
+                    Rectangle newRectangle = new Rectangle(); //instance of new rectangle shape
+                    newRectangle.Width = width; //set width
+                    newRectangle.Height = height; //set height     
+                    SolidColorBrush elmbrush = new SolidColorBrush(); //brush
+                    elmbrush.Color = Windows.UI.Colors.Yellow; //standard brush color is blue
+                    newRectangle.Fill = elmbrush; //fill color
+                    newRectangle.Name = "Rectangle"; //attach name
+                    Canvas.SetLeft(newRectangle, left); //set left position
+                    Canvas.SetTop(newRectangle, top); //set top position 
+                    grid.Children.Add(newRectangle);
+                }
+                //group size and place calculation
+                if (elm.ActualOffset.X < lowestLeft)
+                {
+                    lowestLeft = left;
+                }
+                if (elm.ActualOffset.Y < lowestTop)
+                {
+                    lowestTop = top;
+                }
+                if (elm.ActualOffset.X > highestLeft)
+                {
+                    highestLeft = left;
+                    highestWidth = (left + width) - lowestLeft;
+                }
+                if (elm.ActualOffset.Y > highestTop)
+                {
+                    highestTop = top;
+                    highestHeight = (top + height) - lowestTop;
+                }
+                //remove selected
+                selectedCanvas.Children.Remove(elm);
+                invoker.selectElementsList.RemoveAt(invoker.selectElementsList.Count() - 1);
+                KeyNumber(elm,invoker);
+            }
+
+            //size and place
+            grid.Height = highestHeight;
+            grid.Width = highestLeft;
+            Canvas.SetTop(grid, lowestTop);
+            Canvas.SetLeft(grid, lowestLeft);
+            //add it to selected canvas
+            selectedCanvas.Children.Add(grid);
+            //add to elements
+            invoker.drawnElements.Add(grid);
+        }
+
+        //remove selected element by access key
+        public void KeyNumber(FrameworkElement element, Invoker invoker)
+        {
+            string key = element.AccessKey;
+            int inc = 0;
+            int number = 0;
+            foreach (FrameworkElement drawn in invoker.drawnElements)
+            {
+                if (drawn.AccessKey == key)
+                {
+                    number = inc;
+                }
+                inc++;
+            }
+            invoker.drawnElements.RemoveAt(number);
+            invoker.removedElements.Add(element);
+            invoker.movedElements.Add(element);
+        }
+
+        public void UnGroup(Group group, Canvas selectedCanvas, Invoker invoker)
+        {
+
+        }
+
+        public void Add(Baseshape newgroup)
         {
             children.Add(newgroup);
         }
 
-        public void remove(Baseshape newgroup)
+        public void Remove(Baseshape newgroup)
         {
             children.Remove(newgroup);
         }
 
-        public List<Baseshape> getGroup()
+        public List<Baseshape> GetGroup()
         {
             return children;
         }
 
-        public override string display(int depth)
+        public override string Display(int depth)
         {
             //Display group.
             string str = "";
@@ -121,7 +232,7 @@ namespace tekenprogramma
                 }
                 else
                 {
-                    child.display(depth + 1);
+                    child.Display(depth + 1);
                 }
 
             }
@@ -130,16 +241,16 @@ namespace tekenprogramma
         }
 
         //moving
-        public override void moving(Location location)
+        public override void Moving(PointerRoutedEventArgs e)
         {
             bool s = false;
             foreach (Baseshape shape in this.children)
             {
                 if (shape.selected)
                 {
-                    Location childLocation = new Location(location.x, location.y, shape.width, shape.height);
-                    shape.moving(childLocation);
-                    s = true;
+                    //Location childLocation = new Location(e.GetCurrentPoint(selectedCanvas).Position.X, e.GetCurrentPoint(selectedCanvas).Position.Y, shape.width, shape.height);
+                    //shape.Moving(childLocation);
+                    //s = true;
                 }
             }
 
@@ -147,8 +258,8 @@ namespace tekenprogramma
             {
                 foreach (Baseshape shape in this.children)
                 {
-                    double dx = location.x - this.start.x + shape.start.x;
-                    double dy = location.y - this.start.y + shape.start.y;
+                    double dx = e.GetCurrentPoint(selectedCanvas).Position.X - this.start.x + shape.start.x;
+                    double dy = e.GetCurrentPoint(selectedCanvas).Position.Y - this.start.y + shape.start.y;
 
                     Location childLocation = new Location();
                     childLocation.x = dx;
@@ -156,7 +267,7 @@ namespace tekenprogramma
                     childLocation.width = shape.width;
                     childLocation.height = shape.height;
 
-                    shape.moving(childLocation);
+                    //shape.Moving(childLocation);
 
                 }
 
@@ -164,7 +275,7 @@ namespace tekenprogramma
         }
 
         //undo moving
-        public override void undoMoving()
+        public override void UndoMoving()
         {
             Location location = this.undoList.Last();
             this.redoList.Add(location);
@@ -175,7 +286,7 @@ namespace tekenprogramma
         }
 
         //redo moving
-        public override void redoMoving()
+        public override void RedoMoving()
         {
             if (this.redoList.Count() > 0)
             {
@@ -189,41 +300,42 @@ namespace tekenprogramma
         }
 
         //resize
-        public override void resize(Location location)
+        public override void Resize(PointerRoutedEventArgs e)
         {
             bool s = false;
+            FrameworkElement elm = e.OriginalSource as FrameworkElement;
             foreach (Baseshape shape in this.children)
             {
                 if (shape.selected)
                 {
                     s = true;
-                    Location childLocation = new Location(shape.x, shape.y, location.width - (shape.start.x - location.x), location.height - (shape.start.y - location.y));
-                    shape.resize(childLocation);
+                    //Location childLocation = new Location(shape.x, shape.y, elm.Width - (shape.start.x - e.GetCurrentPoint(selectedCanvas).Position.X), elm.Height - (shape.start.y - e.GetCurrentPoint(selectedCanvas).Position.Y));
+                    //shape.Resize(childLocation);
                 }
             }
 
             if (s == false)
             {
-                float percentageWidth = (float)location.width / (float)this.start.width;
-                float percentageHeight = (float)location.height / (float)this.start.height;
+                //float percentageWidth = (float)location.width / (float)this.start.width;
+                //float percentageHeight = (float)location.height / (float)this.start.height;
 
                 foreach (Baseshape shape in this.children)
                 {
-                    float diffX = ((float)shape.start.x - (float)this.x) * percentageWidth;
-                    float diffY = ((float)shape.start.y - (float)this.y) * percentageHeight;
+                    //float diffX = ((float)shape.start.x - (float)this.x) * percentageWidth;
+                    //float diffY = ((float)shape.start.y - (float)this.y) * percentageHeight;
 
-                    Location childLocation = new Location();
-                    childLocation.x = this.start.x + Math.Round(diffX);
-                    childLocation.y = this.start.y + Math.Round(diffY);
-                    childLocation.width = Math.Round((float)shape.start.width * percentageWidth);
-                    childLocation.height = Math.Round((float)shape.start.height * percentageHeight);
-                    shape.resize(childLocation);
+                    //Location childLocation = new Location();
+                    //childLocation.x = this.start.x + Math.Round(diffX);
+                    //childLocation.y = this.start.y + Math.Round(diffY);
+                    //childLocation.width = Math.Round((float)shape.start.width * percentageWidth);
+                    //childLocation.height = Math.Round((float)shape.start.height * percentageHeight);
+                    //shape.Resize(childLocation);
                 }
             }
         }
 
         //undo resize
-        public override void undoResize()
+        public override void UndoResize()
         {
             Location location = this.undoList.Last();
             this.redoList.Add(location);
@@ -234,7 +346,7 @@ namespace tekenprogramma
         }
 
         //redo resize
-        public override void redoResize()
+        public override void RedoResize()
         {
             if (this.redoList.Count() > 0)
             {
@@ -249,7 +361,7 @@ namespace tekenprogramma
 
 
         //select group
-        public override void select(PointerRoutedEventArgs e, Canvas paintSurface)
+        public override void Select(PointerRoutedEventArgs e, Canvas selectedCanvas)
         {
             foreach (Baseshape baseshape in this.children)
             {
@@ -257,21 +369,21 @@ namespace tekenprogramma
                 
                 if (this.selected)
                 {
-                    if (baseshape.getIfSelected(e.GetCurrentPoint(paintSurface).Position.X, e.GetCurrentPoint(paintSurface).Position.Y))
+                    if (baseshape.GetIfSelected(e.GetCurrentPoint(selectedCanvas).Position.X, e.GetCurrentPoint(selectedCanvas).Position.Y))
                     {
-                        ICommand select = new Select(shape, e);
+                        ICommand select = new Select(shape, e, this.invoker);
                         this.invoker.Execute(select);
                     }
                     else
                     {
-                        ICommand deselect = new Deselect(shape, e);
+                        ICommand deselect = new Deselect(shape, e,this.invoker);
                         this.invoker.Execute(deselect);
                     }
 
-                    if (baseshape.getHandleIfSelected(e.GetCurrentPoint(paintSurface).Position.X, e.GetCurrentPoint(paintSurface).Position.Y))
+                    if (baseshape.GetHandleIfSelected(e.GetCurrentPoint(selectedCanvas).Position.X, e.GetCurrentPoint(selectedCanvas).Position.Y))
                     {
-                        Location location = new Location(e.GetCurrentPoint(paintSurface).Position.X, e.GetCurrentPoint(paintSurface).Position.Y, 0,0);
-                        ICommand resize = new Resize(shape, this.invoker, e, location, paintSurface, this.element);
+                        Location location = new Location(e.GetCurrentPoint(selectedCanvas).Position.X, e.GetCurrentPoint(selectedCanvas).Position.Y, 0,0);
+                        ICommand resize = new Resize(shape, this.invoker, e, location, selectedCanvas, this.element);
                         this.invoker.Execute(resize);
                     }
                 }
@@ -280,29 +392,26 @@ namespace tekenprogramma
         }
 
         //deselect group
-        public override void deselect(PointerRoutedEventArgs e)
+        public override void Deselect(PointerRoutedEventArgs e)
         {
             foreach (Baseshape baseshape in this.children)
             {
                 Shape shape = new Shape(baseshape.x, baseshape.y, baseshape.width, baseshape.height);
                 if (baseshape.selected)
                 {
-                    ICommand deselect = new Deselect(shape, e);
+                    ICommand deselect = new Deselect(shape, e, this.invoker);
                     this.invoker.Execute(deselect);
                 }
             }
             this.selected = false;
         }
 
-
-
-
         //if selected
-        public override bool getIfSelected(double x, double y)
+        public override bool GetIfSelected(double x, double y)
         {
             foreach (Baseshape shape in this.children)
             {
-                if (shape.getIfSelected(x, y))
+                if (shape.GetIfSelected(x, y))
                 {
                     return true;
                 }
@@ -310,12 +419,12 @@ namespace tekenprogramma
             return false;
         }
 
-        public override bool getHandleIfSelected(double x, double y)
+        public override bool GetHandleIfSelected(double x, double y)
         {
             bool s = false;
             foreach (Baseshape shape in this.children)
             {
-                if (shape.getHandleIfSelected(x, y))
+                if (shape.GetHandleIfSelected(x, y))
                 {
                     s = true;
                     return true;

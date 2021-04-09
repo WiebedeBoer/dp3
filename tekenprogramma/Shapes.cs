@@ -31,6 +31,8 @@ namespace tekenprogramma
         public FrameworkElement prevelement; //prev element
         public FrameworkElement nextelement; //next element
 
+        public FrameworkElement selectedElement; //selected
+
         //file IO
         public string fileText { get; set; }
 
@@ -44,15 +46,27 @@ namespace tekenprogramma
         }
 
         // Selects the shape
-        public void Select(PointerRoutedEventArgs e)
+        public void Select(Invoker invoker, PointerRoutedEventArgs e)
         {
-            //this.selected = true;
+            selectedElement = e.OriginalSource as FrameworkElement;
+            selectedElement.Opacity = 0.6; //fill opacity
+            invoker.selectElementsList.Add(selectedElement);
         }
 
         // Deselects the shape
-        public void Deselect(PointerRoutedEventArgs e)
+        public void Deselect(Invoker invoker, PointerRoutedEventArgs e)
         {
-            //this.selected = false;
+            selectedElement = invoker.selectElementsList.Last();
+            invoker.selectElementsList.RemoveAt(invoker.selectElementsList.Count() -1);
+            invoker.unselectElementsList.Add(selectedElement);
+        }
+
+        // Reselect the shape
+        public void Reselect(Invoker invoker, PointerRoutedEventArgs e)
+        {
+            selectedElement = invoker.unselectElementsList.Last();
+            invoker.unselectElementsList.RemoveAt(invoker.unselectElementsList.Count() - 1);
+            invoker.selectElementsList.Add(selectedElement);
         }
 
         //

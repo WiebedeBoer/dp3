@@ -52,22 +52,21 @@ namespace tekenprogramma
 
         //}
 
-        public abstract string display(int depth);
+        public abstract string Display(int depth);
 
-        public abstract void select(PointerRoutedEventArgs e, Canvas paintSurface);
-        public abstract void deselect(PointerRoutedEventArgs e);
+        public abstract void Select(PointerRoutedEventArgs e, Canvas paintSurface);
+        public abstract void Deselect(PointerRoutedEventArgs e);
 
-        public abstract void moving(Location location);
-        public abstract void undoMoving();
-        public abstract void redoMoving();
-        public abstract void resize(Location location);
-        public abstract void undoResize();
-        public abstract void redoResize();
+        public abstract void Moving(PointerRoutedEventArgs e);
+        public abstract void UndoMoving();
+        public abstract void RedoMoving();
+        public abstract void Resize(PointerRoutedEventArgs e);
+        public abstract void UndoResize();
+        public abstract void RedoResize();
 
-        public abstract bool getIfSelected(double x, double y);
-        public abstract bool getHandleIfSelected(double x, double y);
-        //public abstract void saving();
-        //public abstract void loading();
+        public abstract bool GetIfSelected(double x, double y);
+        public abstract bool GetHandleIfSelected(double x, double y);
+
 
     }
 }

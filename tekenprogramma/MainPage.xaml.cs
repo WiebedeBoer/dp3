@@ -25,8 +25,8 @@ namespace tekenprogramma
         public Invoker invoker = new Invoker();
         public List<Shape> selectedShapesList = new List<Shape>();
         public FrameworkElement selectedElement;
-        public List<FrameworkElement> selectedElements = new List<FrameworkElement>();
-        public List<FrameworkElement> selectElementsList = new List<FrameworkElement>();
+        //public List<FrameworkElement> selectedElements = new List<FrameworkElement>();
+        
 
         public MainPage()
         {
@@ -48,7 +48,7 @@ namespace tekenprogramma
 
         }
 
-        //grouped
+        //non grouped
         private void non_grouped(object sender, PointerRoutedEventArgs e)
         {
             //selecting modus
@@ -58,15 +58,11 @@ namespace tekenprogramma
                 //canvas elements
                 if (selectedElement.Name == "Rectangle")
                 {
-                    selecting = true;
-                    selectedElement.Opacity = 0.6; //fill opacity
-                    selectedElements.Add(selectedElement);
+                    Selecting(sender, e);
                 }
                 else if (selectedElement.Name == "Ellipse")
                 {
-                    selecting = true;
-                    selectedElement.Opacity = 0.6; //fill opacity
-                    selectedElements.Add(selectedElement);
+                    Selecting(sender, e);
                 }
                 //not canvas elements
                 else
@@ -138,7 +134,7 @@ namespace tekenprogramma
                     selecting = true;
                     //selectedShapesList.Add(shape);
                     selectedElement = tmp;
-                    selectElementsList.Add(selectedElement);
+                    //selectElementsList.Add(selectedElement);
                     Group group = new Group(left, top, width, height, "rectangle", 0, 0, paintSurface, invoker, selectedElement);
                     ICommand place = new MakeGroup(group, paintSurface, invoker);
                     this.invoker.Execute(place);
@@ -155,7 +151,7 @@ namespace tekenprogramma
                     selecting = true;
                     //selectedShapesList.Add(shape);
                     selectedElement = tmp;
-                    selectElementsList.Add(selectedElement);
+                    //selectElementsList.Add(selectedElement);
                     Group group = new Group(left, top, width, height, "ellipse", 0, 0, paintSurface, invoker, selectedElement);
                     ICommand place = new MakeGroup(group, paintSurface, invoker);
                     this.invoker.Execute(place);
@@ -168,16 +164,24 @@ namespace tekenprogramma
                 if (type == "Move")
                 {
                     MovingGroup(sender, e);
-                    selectElementsList.Clear();
+                    invoker.selectElementsList.Clear();
                 }
                 //resize
                 else if (type == "Resize")
                 {
                     ResizingGroup(sender, e);
-                    selectElementsList.Clear();
+                    invoker.selectElementsList.Clear();
                 }
 
             }
+        }
+
+        //selecting shape
+        private void Selecting(object sender, PointerRoutedEventArgs e)
+        {
+            Shape shape = new Shape(e.GetCurrentPoint(paintSurface).Position.X, e.GetCurrentPoint(paintSurface).Position.Y, 50, 50);
+            ICommand place = new MakeRectangles(shape, this.invoker, paintSurface);
+            this.invoker.Execute(place);
         }
 
         //make rectangle shape
@@ -301,61 +305,6 @@ namespace tekenprogramma
             Group group = new Group(0, 0, 0, 0, "group", 0,0, paintSurface,invoker, selectedElement);
             ICommand place = new MakeGroup(group,paintSurface,invoker);
             this.invoker.Execute(place);
-
-            Canvas grid = new Canvas();
-            //grid.Background = Opacity(1);
-            SolidColorBrush groupbrush = new SolidColorBrush(); //brush
-            groupbrush.Color = Windows.UI.Colors.Yellow; //standard brush color is blue
-            groupbrush.Opacity = 0.5; //half opacity
-            grid.Background = groupbrush;
-            grid.Height = paintSurface.Height;
-            grid.Width = paintSurface.Width;
-            Canvas.SetTop(grid, 0);
-            Canvas.SetLeft(grid, 0);
-
-
-            foreach(FrameworkElement elm in selectElementsList)
-            {
-                double top = (double)elm.GetValue(Canvas.TopProperty);
-                double left = (double)elm.GetValue(Canvas.LeftProperty);
-                double width = elm.Width;
-                double height = elm.Height;
-                Group selectedgroup = new Group(left, top, width, height, elm.Name, 0, 0, paintSurface, invoker, elm);
-                //ICommand addgroup = new MakeGroup(selectedgroup, paintSurface, invoker);
-                //this.invoker.Execute(addgroup);
-                group.add(selectedgroup);
-                //grid.Children.Add(elm);
-
-                if (elm.Name=="Ellipse")
-                {
-                    Ellipse newEllipse = new Ellipse(); //instance of new ellipse shape
-                    newEllipse.Width = width;
-                    newEllipse.Height = height;
-                    SolidColorBrush elmbrush = new SolidColorBrush();//brush
-                    elmbrush.Color = Windows.UI.Colors.Yellow;//standard brush color is blue
-                    newEllipse.Fill = elmbrush;//fill color
-                    newEllipse.Name = "Ellipse";//attach name
-                    Canvas.SetLeft(newEllipse, left);//set left position
-                    Canvas.SetTop(newEllipse, top);//set top position
-                    grid.Children.Add(newEllipse);
-                }
-                else if(elm.Name == "Rectangle")
-                {
-                    Rectangle newRectangle = new Rectangle(); //instance of new rectangle shape
-                    newRectangle.Width = width; //set width
-                    newRectangle.Height = height; //set height     
-                    SolidColorBrush elmbrush = new SolidColorBrush(); //brush
-                    elmbrush.Color = Windows.UI.Colors.Yellow; //standard brush color is blue
-                    newRectangle.Fill = elmbrush; //fill color
-                    newRectangle.Name = "Rectangle"; //attach name
-                    Canvas.SetLeft(newRectangle, left); //set left position
-                    Canvas.SetTop(newRectangle, top); //set top position 
-                    grid.Children.Add(newRectangle);
-                }
-
-
-            }
-            this.paintSurface.Children.Add(grid);
             grouping = true;
         }
 

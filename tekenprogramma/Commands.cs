@@ -157,8 +157,9 @@ namespace tekenprogramma
 
         private PointerRoutedEventArgs e;
         private Shape shape;
+        private Invoker invoker;
 
-        public Select(Shape shape, PointerRoutedEventArgs e)
+        public Select(Shape shape, PointerRoutedEventArgs e,Invoker invoker)
         {
             this.e = e;
             this.shape = shape;
@@ -166,28 +167,29 @@ namespace tekenprogramma
 
         public void Execute()
         {
-            this.shape.Select(this.e);
+            this.shape.Select(this.invoker, this.e);
         }
 
         public void Undo()
         {
-            this.shape.Deselect(this.e);
+            this.shape.Deselect(this.invoker, this.e);
         }
 
         public void Redo()
         {
-            this.shape.Select(this.e);
+            this.shape.Reselect(this.invoker, this.e);
         }
     }
 
-    //class deselect
+    //class select
     public class Deselect : ICommand
     {
 
         private PointerRoutedEventArgs e;
         private Shape shape;
+        private Invoker invoker;
 
-        public Deselect(Shape shape, PointerRoutedEventArgs e)
+        public Deselect(Shape shape, PointerRoutedEventArgs e, Invoker invoker)
         {
             this.e = e;
             this.shape = shape;
@@ -195,19 +197,20 @@ namespace tekenprogramma
 
         public void Execute()
         {
-            this.shape.Deselect(this.e);
+            this.shape.Deselect(this.invoker, this.e);
         }
 
         public void Undo()
         {
-            this.shape.Select(this.e);
+            this.shape.Select(this.invoker, this.e);
         }
 
         public void Redo()
         {
-            this.shape.Deselect(this.e);
+            this.shape.Deselect(this.invoker, this.e);
         }
     }
+
 
     //class saving
     public class Saved : ICommand
@@ -269,29 +272,29 @@ namespace tekenprogramma
     public class MakeGroup : ICommand
     {
         private Group mycommand;
-        private Canvas paintSurface;
+        private Canvas selectedCanvas;
         private Invoker invoker;
 
-        public MakeGroup(Group mycommand, Canvas paintSurface, Invoker invoker)
+        public MakeGroup(Group mycommand, Canvas selectedCanvas, Invoker invoker)
         {
             this.mycommand = mycommand;
-            this.paintSurface = paintSurface;
+            this.selectedCanvas = selectedCanvas;
             this.invoker = invoker;
         }
 
         public void Execute()
         {
-            this.mycommand.add(this.mycommand);
+            this.mycommand.MakeGroup(this.mycommand, this.selectedCanvas, this.invoker);
         }
 
         public void Undo()
         {
-            this.mycommand.remove(this.mycommand);
+            this.mycommand.UnGroup(this.mycommand, this.selectedCanvas, this.invoker);
         }
 
         public void Redo()
         {
-            this.mycommand.add(this.mycommand);
+            this.mycommand.Add(this.mycommand);
         }
     }
 
@@ -315,17 +318,17 @@ namespace tekenprogramma
 
         public void Execute()
         {
-            //this.mycommand.resize(this.mycommand);
+            this.mycommand.Resize(this.e);
         }
 
         public void Undo()
         {
-            //this.mycommand.undoResize(this.mycommand);
+            this.mycommand.UndoResize();
         }
 
         public void Redo()
         {
-            //this.mycommand.redoResize(this.mycommand);
+            this.mycommand.RedoResize();
         }
     }
 
@@ -349,17 +352,17 @@ namespace tekenprogramma
 
         public void Execute()
         {
-            //this.mycommand.moving(this.mycommand);
+            this.mycommand.Moving(this.e);
         }
 
         public void Undo()
         {
-            //this.mycommand.undoMoving(this.mycommand);
+            this.mycommand.UndoMoving();
         }
 
         public void Redo()
         {
-            //this.mycommand.redoMoving(this.mycommand);
+            this.mycommand.RedoMoving();
         }
     }
 
