@@ -50,6 +50,9 @@ namespace tekenprogramma
 
         public List<Baseshape> children = new List<Baseshape>();
 
+        public List<FrameworkElement> selectedElements = new List<FrameworkElement>();
+        public List<FrameworkElement> unselectedElements = new List<FrameworkElement>();
+
         public Invoker invoker;
         public FrameworkElement element;
 
