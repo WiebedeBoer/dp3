@@ -55,6 +55,7 @@ namespace tekenprogramma
 
         public Invoker invoker;
         public FrameworkElement element;
+        public Canvas lastCanvas;
 
         public Group(double height, double width, double x, double y, string type, int depth, int id, Canvas selectedCanvas, Invoker invoker, FrameworkElement element) : base(height, width, x, y)
         {
@@ -155,6 +156,8 @@ namespace tekenprogramma
             selectedCanvas.Children.Add(grid);
             //add to elements
             invoker.drawnElements.Add(grid);
+
+            invoker.canvases.Add(grid);
         }
 
         //remove selected element by access key
@@ -176,8 +179,25 @@ namespace tekenprogramma
             invoker.movedElements.Add(element);
         }
 
-        public void UnGroup(Group group, Canvas selectedCanvas, Invoker invoker)
+        public void UnGroup(Group group, Canvas selectedCanvas, Invoker invoker, FrameworkElement element)
         {
+            lastCanvas = invoker.canvases.Last();
+            
+            foreach (FrameworkElement elm in lastCanvas.Children)
+            {
+                selectedCanvas.Children.Add(elm);
+                invoker.removedElements.RemoveAt(invoker.removedElements.Count() -1);
+                invoker.drawnElements.Add(elm);
+            }
+        }
+
+        public void ReGroup()
+        {
+            lastCanvas = invoker.removedcanvases.Last();
+            foreach (FrameworkElement elm in lastCanvas.Children)
+            {
+                KeyNumber(elm, invoker);
+            }
 
         }
 

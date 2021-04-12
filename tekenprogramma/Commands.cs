@@ -274,12 +274,14 @@ namespace tekenprogramma
         private Group mycommand;
         private Canvas selectedCanvas;
         private Invoker invoker;
+        private FrameworkElement element;
 
-        public MakeGroup(Group mycommand, Canvas selectedCanvas, Invoker invoker)
+        public MakeGroup(Group mycommand, Canvas selectedCanvas, Invoker invoker, FrameworkElement element)
         {
             this.mycommand = mycommand;
             this.selectedCanvas = selectedCanvas;
             this.invoker = invoker;
+            this.element = element;
         }
 
         public void Execute()
@@ -289,7 +291,7 @@ namespace tekenprogramma
 
         public void Undo()
         {
-            this.mycommand.UnGroup(this.mycommand, this.selectedCanvas, this.invoker);
+            this.mycommand.UnGroup(this.mycommand, this.selectedCanvas, this.invoker,this.element);
         }
 
         public void Redo()
