@@ -123,7 +123,7 @@ namespace tekenprogramma
             {
                 //select shapes
                 FrameworkElement backupprep = e.OriginalSource as FrameworkElement;
-                if (backupprep.Name == "Rectangle")
+                if (backupprep.Name != "Rectangle" && backupprep.Name !="Ellipse" && backupprep.Name != "paintSurface")
                 {
                     Rectangle tmp = backupprep as Rectangle;
                     backuprectangle = tmp;
@@ -136,9 +136,10 @@ namespace tekenprogramma
                     selectedElement = tmp;
                     //selectElementsList.Add(selectedElement);
                     Group group = new Group(left, top, width, height, "rectangle", 0, 0, paintSurface, invoker, selectedElement);
-                    ICommand place = new MakeGroup(group, paintSurface, invoker);
+                    ICommand place = new MakeGroup(group, paintSurface, invoker, backupprep);
                     this.invoker.Execute(place);
                 }
+                /*
                 else if (backupprep.Name == "Ellipse")
                 {
                     Ellipse tmp = backupprep as Ellipse;
@@ -156,6 +157,7 @@ namespace tekenprogramma
                     ICommand place = new MakeGroup(group, paintSurface, invoker);
                     this.invoker.Execute(place);
                 }
+                */
 
             }
             else
@@ -301,9 +303,9 @@ namespace tekenprogramma
         {
             FrameworkElement button = e.OriginalSource as FrameworkElement;
             type = button.Name;
-
+            Canvas newcanvas = new Canvas();
             Group group = new Group(0, 0, 0, 0, "group", 0,0, paintSurface,invoker, selectedElement);
-            ICommand place = new MakeGroup(group,paintSurface,invoker);
+            ICommand place = new MakeGroup(group,paintSurface,invoker,newcanvas);
             this.invoker.Execute(place);
             grouping = true;
         }

@@ -27,6 +27,9 @@ namespace tekenprogramma
         public List<FrameworkElement> selectElementsList = new List<FrameworkElement>();
         public List<FrameworkElement> unselectElementsList = new List<FrameworkElement>();
 
+        public List<Canvas> selectedCanvases = new List<Canvas>();
+        public List<Canvas> unselectedCanvases = new List<Canvas>();
+
         public int counter = 0;
         public int executer = 0;
 

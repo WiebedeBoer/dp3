@@ -53,6 +53,9 @@ namespace tekenprogramma
         public List<FrameworkElement> selectedElements = new List<FrameworkElement>();
         public List<FrameworkElement> unselectedElements = new List<FrameworkElement>();
 
+        public List<Canvas> groupedCanvases = new List<Canvas>();
+        public List<Canvas> ungroupedCanvases = new List<Canvas>();
+
         public Invoker invoker;
         public FrameworkElement element;
         public Canvas lastCanvas;
@@ -86,6 +89,7 @@ namespace tekenprogramma
             double highestTop = 0;
             double highestWidth = 0;
             double highestHeight = 0;
+
             //get selected elements
             foreach (FrameworkElement elm in invoker.selectElementsList)
             {
@@ -147,6 +151,49 @@ namespace tekenprogramma
                 KeyNumber(elm,invoker);
             }
 
+
+            //getselected canvases and elements
+
+            foreach (Canvas canv in invoker.selectedCanvases)
+            {
+                //elements at canvas
+                //get selected elements
+                foreach (FrameworkElement elm in invoker.selectElementsList)
+                {
+                    double top = (double)elm.GetValue(Canvas.TopProperty);
+                    double left = (double)elm.GetValue(Canvas.LeftProperty);
+                    double width = elm.Width;
+                    double height = elm.Height;
+                    //group size and place calculation
+                    if (elm.ActualOffset.X < lowestLeft)
+                    {
+                        lowestLeft = left;
+                    }
+                    if (elm.ActualOffset.Y < lowestTop)
+                    {
+                        lowestTop = top;
+                    }
+                    if (elm.ActualOffset.X > highestLeft)
+                    {
+                        highestLeft = left;
+                        highestWidth = (left + width) - lowestLeft;
+                    }
+                    if (elm.ActualOffset.Y > highestTop)
+                    {
+                        highestTop = top;
+                        highestHeight = (top + height) - lowestTop;
+                    }
+                }
+                //add it to selected canvas
+                //selectedCanvas.Children.Add(canv);
+                //add to elements
+                //invoker.drawnElements.Add(canv);
+                invoker.canvases.Add(canv);
+                //grouped
+                groupedCanvases.Add(canv);
+            }
+
+
             //size and place
             grid.Height = highestHeight;
             grid.Width = highestLeft;
@@ -156,7 +203,6 @@ namespace tekenprogramma
             selectedCanvas.Children.Add(grid);
             //add to elements
             invoker.drawnElements.Add(grid);
-
             invoker.canvases.Add(grid);
         }
 
