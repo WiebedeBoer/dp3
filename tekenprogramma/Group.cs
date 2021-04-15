@@ -235,6 +235,11 @@ namespace tekenprogramma
                 invoker.removedElements.RemoveAt(invoker.removedElements.Count() -1);
                 invoker.drawnElements.Add(elm);
             }
+
+            foreach (Canvas canv in this.groupedCanvases)
+            {
+                this.ungroupedCanvases.Add(canv);
+            }
         }
 
         public void ReGroup()
@@ -243,6 +248,11 @@ namespace tekenprogramma
             foreach (FrameworkElement elm in lastCanvas.Children)
             {
                 KeyNumber(elm, invoker);
+            }
+
+            foreach (Canvas canv in this.ungroupedCanvases)
+            {
+                this.groupedCanvases.Add(canv);
             }
 
         }
