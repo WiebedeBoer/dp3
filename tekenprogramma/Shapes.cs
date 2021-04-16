@@ -310,11 +310,17 @@ namespace tekenprogramma
                         string str = "rectangle " + left + " " + top + " " + child.Width + " " + child.Height + "\n";
                         lines += str;
                     }
-                    else
+                    else if (child is Ellipse)
                     {
                         double top = (double)child.GetValue(Canvas.TopProperty);
                         double left = (double)child.GetValue(Canvas.LeftProperty);
                         string str = "ellipse " + left + " " + top + " " + child.Width + " " + child.Height + "\n";
+                        lines += str;
+                    }
+                    else if (child is Canvas)
+                    {
+                        Group grouping = new Group(0, 0, 0, 0, "group", 0, 0, paintSurface, invoker, selectedElement);
+                        string str = grouping.Display(0);
                         lines += str;
                     }
                 }
@@ -346,7 +352,7 @@ namespace tekenprogramma
         //
         //loading
         //
-        public async void Loading(Canvas paintSurface)
+        public async void Loading(Canvas paintSurface, Invoker invoker)
         {
             //clear previous canvas
             paintSurface.Children.Clear();
@@ -365,9 +371,14 @@ namespace tekenprogramma
                     {
                         this.GetEllipse(s, paintSurface);
                     }
-                    else
+                    else if(line[0] == "Rectangle")
                     {
                         this.GetRectangle(s, paintSurface);
+                    }
+                    else if (line[0] == "Group")
+                    {
+                        Group grouping = new Group(0, 0, 0, 0, "group", 0, Convert.ToInt32(line[1]), paintSurface, invoker, selectedElement);
+                        grouping.MakeGroup(grouping, paintSurface, invoker);
                     }
                 }
             }

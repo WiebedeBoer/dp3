@@ -345,7 +345,7 @@ namespace tekenprogramma
             FrameworkElement button = e.OriginalSource as FrameworkElement;
             type = button.Name;
             Shape command = new Shape(0, 0, 0, 0);
-            ICommand place = new Loaded(command, paintSurface);
+            ICommand place = new Loaded(command, paintSurface,invoker);
             invoker.Execute(place);
             grouping = false;
         }

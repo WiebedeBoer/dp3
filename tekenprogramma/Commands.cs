@@ -245,16 +245,17 @@ namespace tekenprogramma
     {
         private Shape mycommand;
         private Canvas paintSurface;
-
-        public Loaded(Shape mycommand, Canvas paintSurface)
+        private Invoker invoker;
+        public Loaded(Shape mycommand, Canvas paintSurface, Invoker invoker)
         {
             this.mycommand = mycommand;
             this.paintSurface = paintSurface;
+            this.invoker = invoker;
         }
 
         public void Execute()
         {
-            this.mycommand.Loading(this.paintSurface);
+            this.mycommand.Loading(this.paintSurface,this.invoker);
         }
 
         public void Undo()
