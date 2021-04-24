@@ -154,6 +154,14 @@ namespace tekenprogramma
             //FrameworkElement element = invoker.selectElementsList.Last();
             KeyNumber(element, invoker); //move selected at removed
             //create at new location
+            MovingElement(element, invoker, paintSurface, location);
+            Repaint(invoker, paintSurface); //repaint
+        }
+
+
+        public FrameworkElement MovingElement(FrameworkElement element, Invoker invoker, Canvas paintSurface, Location location)
+        {
+            FrameworkElement returnelement = null;
             if (element.Name == "Rectangle")
             {
                 Rectangle newRectangle = new Rectangle(); //instance of new rectangle shape
@@ -167,6 +175,7 @@ namespace tekenprogramma
                 Canvas.SetLeft(newRectangle, location.x);//set left position
                 Canvas.SetTop(newRectangle, location.y); //set top position          
                 invoker.drawnElements.Add(newRectangle);
+                returnelement = newRectangle;
             }
             else if (element.Name == "Ellipse")
             {
@@ -181,9 +190,9 @@ namespace tekenprogramma
                 Canvas.SetLeft(newEllipse, location.x);//set left position
                 Canvas.SetTop(newEllipse, location.y);//set top position
                 invoker.drawnElements.Add(newEllipse);
+                returnelement = newEllipse;
             }
-            Repaint(invoker, paintSurface); //repaint
-
+            return returnelement;
         }
 
         //remove selected element by access key
@@ -238,10 +247,11 @@ namespace tekenprogramma
         //
 
         //resize shape
-        public void Resize(Invoker invoker, PointerRoutedEventArgs e, Canvas paintSurface, Location location, FrameworkElement element)
+        public void Resize(Invoker invoker, PointerRoutedEventArgs e, Canvas paintSurface, FrameworkElement element)
         {
             //FrameworkElement element = invoker.selectElementsList.Last();
             KeyNumber(element, invoker); //move selected at removed
+
             //calculate size
             double ex = e.GetCurrentPoint(paintSurface).Position.X;
             double ey = e.GetCurrentPoint(paintSurface).Position.Y;
@@ -249,36 +259,52 @@ namespace tekenprogramma
             double lh = Convert.ToDouble(element.ActualOffset.Y); //set height
             double w = ReturnSmallest(ex, lw);
             double h = ReturnSmallest(ey, lh);
+
+            Location location = new Location();
+            location.x = Convert.ToDouble(element.ActualOffset.X);
+            location.y = Convert.ToDouble(element.ActualOffset.Y);
+            location.width = w;
+            location.height = h;
+
+            ResizingElement(invoker, e, paintSurface, location, element);
+            Repaint(invoker, paintSurface); //repaint
+        }
+
+        public FrameworkElement ResizingElement(Invoker invoker, PointerRoutedEventArgs e, Canvas paintSurface, Location location, FrameworkElement element)
+        {
+            FrameworkElement returnelement = null;
             //create at new size
             if (element.Name == "Rectangle")
             {
                 Rectangle newRectangle = new Rectangle(); //instance of new rectangle shape
                 newRectangle.AccessKey = invoker.executer.ToString();
-                newRectangle.Width = w; //set width
-                newRectangle.Height = h; //set height     
+                newRectangle.Width = location.width; //set width
+                newRectangle.Height = location.height; //set height     
                 SolidColorBrush brush = new SolidColorBrush(); //brush
                 brush.Color = Windows.UI.Colors.Yellow; //standard brush color is blue
                 newRectangle.Fill = brush; //fill color
                 newRectangle.Name = "Rectangle"; //attach name
-                Canvas.SetLeft(newRectangle, lw);
-                Canvas.SetTop(newRectangle, lh);
+                Canvas.SetLeft(newRectangle, location.x);
+                Canvas.SetTop(newRectangle, location.y);
                 invoker.drawnElements.Add(newRectangle);
+                returnelement = newRectangle;
             }
             else if (element.Name == "Ellipse")
             {
                 Ellipse newEllipse = new Ellipse(); //instance of new ellipse shape
                 newEllipse.AccessKey = invoker.executer.ToString();
-                newEllipse.Width = w; //set width
-                newEllipse.Height = h; //set height 
+                newEllipse.Width = location.width; //set width
+                newEllipse.Height = location.height; //set height 
                 SolidColorBrush brush = new SolidColorBrush();//brush
                 brush.Color = Windows.UI.Colors.Yellow;//standard brush color is blue
                 newEllipse.Fill = brush;//fill color
                 newEllipse.Name = "Ellipse";//attach name
-                Canvas.SetLeft(newEllipse, lw);//set left position
-                Canvas.SetTop(newEllipse, lh);//set top position
+                Canvas.SetLeft(newEllipse, location.x);//set left position
+                Canvas.SetTop(newEllipse, location.y);//set top position
                 invoker.drawnElements.Add(newEllipse);
+                returnelement = newEllipse;
             }
-            Repaint(invoker, paintSurface); //repaint
+            return returnelement;
         }
 
         //give smallest

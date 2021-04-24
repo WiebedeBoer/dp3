@@ -177,20 +177,21 @@ namespace tekenprogramma
             FrameworkElement selectedelement = invoker.selectElementsList.Last();
             Group selectedgroup = invoker.selectedGroups.Last();
             //calculate difference in location
-            double leftOffset = selectedelement.ActualOffset.X - e.GetCurrentPoint(paintSurface).Position.X;
-            double topOffset = selectedelement.ActualOffset.Y - e.GetCurrentPoint(paintSurface).Position.Y;
-
-            foreach (FrameworkElement movedelement in selectedgroup.drawnElements)
+            double leftOffset = Convert.ToDouble(selectedelement.ActualOffset.X) - e.GetCurrentPoint(paintSurface).Position.X;
+            double topOffset = Convert.ToDouble(selectedelement.ActualOffset.Y) - e.GetCurrentPoint(paintSurface).Position.Y;
+            //elements in group
+            foreach (FrameworkElement movedElement in selectedgroup.drawnElements)
             {
                 Location location = new Location();
-                location.x = e.GetCurrentPoint(paintSurface).Position.X;
-                location.y = e.GetCurrentPoint(paintSurface).Position.Y;
-                location.width = movedelement.Width;
-                location.height = movedelement.Height;
-
-                Moving(movedelement, invoker, paintSurface, location);
+                location.x = Convert.ToDouble(movedElement.ActualOffset.X) - leftOffset;
+                location.y = Convert.ToDouble(movedElement.ActualOffset.Y) - topOffset;
+                location.width = movedElement.Width;
+                location.height = movedElement.Height;
+                invoker.executer++;//acceskey add
+                FrameworkElement madeElement = MovingElement(movedElement, invoker, paintSurface, location);
+                this.movedElements.Add(movedElement);
+                this.drawnElements.Add(madeElement);
             }
-
             //add to moved or resized
             invoker.movedGroups.Add(selectedgroup);
             //remove selected element
@@ -199,24 +200,45 @@ namespace tekenprogramma
             //remove selected group
             invoker.unselectedGroups.Add(selectedgroup);
             invoker.selectedGroups.RemoveAt(invoker.selectedGroups.Count() - 1);
-
             Repaint(invoker,paintSurface); //repaint
         }
 
-        //undo moving
-        public void UndoMoving(Invoker invoker)
+        //undo moving or resizing
+        public void Undo(Invoker invoker, Canvas paintSurface)
         {
             Group selectedgroup = invoker.movedGroups.Last();
-            invoker.movedGroups.RemoveAt(invoker.movedGroups.Count() -1);
+            invoker.movedGroups.RemoveAt(invoker.movedGroups.Count() - 1);
             invoker.removedGroups.Add(selectedgroup);
+            foreach (FrameworkElement movedElement in selectedgroup.drawnElements)
+            {          
+                invoker.drawnElements.RemoveAt(invoker.drawnElements.Count() - 1);
+                invoker.removedElements.Add(movedElement);
+            }
+            foreach (FrameworkElement removedElement in selectedgroup.movedElements)
+            {
+                invoker.movedElements.RemoveAt(invoker.movedElements.Count() - 1);
+                invoker.drawnElements.Add(removedElement);
+            }
+            Repaint(invoker, paintSurface); //repaint   
         }
 
-        //redo moving
-        public void RedoMoving(Invoker invoker)
+        //redo moving or resizing
+        public void Redo(Invoker invoker, Canvas paintSurface)
         {
             Group selectedgroup = invoker.removedGroups.Last();
             invoker.removedGroups.RemoveAt(invoker.movedGroups.Count() - 1);
             invoker.movedGroups.Add(selectedgroup);
+            foreach (FrameworkElement movedElement in selectedgroup.movedElements)
+            {      
+                invoker.removedElements.Add(movedElement);
+                invoker.movedElements.Add(movedElement);
+                invoker.drawnElements.RemoveAt(invoker.drawnElements.Count() - 1);
+            }
+            foreach (FrameworkElement removedElement in selectedgroup.drawnElements)
+            {
+                invoker.drawnElements.Add(removedElement);
+            }
+            Repaint(invoker, paintSurface); //repaint   
         }
 
         //resize
@@ -224,11 +246,25 @@ namespace tekenprogramma
         {
             FrameworkElement selectedelement = invoker.selectElementsList.Last();
             Group selectedgroup = invoker.selectedGroups.Last();
-
-            //double oldWidth = selectedelement.Width();
-            //double oldHeight = selectedelement.Height();
-
-
+            //calculate difference in size
+            double newWidth = ReturnSmallest(e.GetCurrentPoint(paintSurface).Position.X, Convert.ToDouble(element.ActualOffset.X));
+            double newHeight = ReturnSmallest(e.GetCurrentPoint(paintSurface).Position.Y, Convert.ToDouble(element.ActualOffset.Y));
+            double widthOffset = selectedelement.Width - newWidth;
+            double heightOffset = selectedelement.Height - newHeight;
+            //elements in group
+            foreach (FrameworkElement movedElement in selectedgroup.drawnElements)
+            {
+                Location location = new Location();
+                location.x = Convert.ToDouble(movedElement.ActualOffset.X);
+                location.y = Convert.ToDouble(movedElement.ActualOffset.Y);
+                location.width = Convert.ToDouble(movedElement.Width) - widthOffset;
+                location.height = Convert.ToDouble(movedElement.Height) - heightOffset;
+                invoker.executer++; //acceskey add
+                FrameworkElement madeElement = ResizingElement(movedElement, invoker, paintSurface, location);
+                this.movedElements.Add(movedElement);
+                //this.drawnElements.RemoveAt(this.drawnElements.Count() -1);
+                this.drawnElements.Add(madeElement);
+            }
             //add to moved or resized
             invoker.movedGroups.Add(selectedgroup);
             //remove selected element
@@ -237,24 +273,7 @@ namespace tekenprogramma
             //remove selected group
             invoker.unselectedGroups.Add(selectedgroup);
             invoker.selectedGroups.RemoveAt(invoker.selectedGroups.Count() - 1);
-
             Repaint(invoker, paintSurface);//repaint
-        }
-
-        //undo resize
-        public void UndoResize(Invoker invoker)
-        {
-            Group selectedgroup = invoker.movedGroups.Last();
-            invoker.movedGroups.RemoveAt(invoker.movedGroups.Count() - 1);
-            invoker.removedGroups.Add(selectedgroup);
-        }
-
-        //redo resize
-        public void RedoResize(Invoker invoker)
-        {
-            Group selectedgroup = invoker.removedGroups.Last();
-            invoker.removedGroups.RemoveAt(invoker.movedGroups.Count() - 1);
-            invoker.movedGroups.Add(selectedgroup);
         }
 
         //repaint
@@ -306,10 +325,23 @@ namespace tekenprogramma
             invoker.movedElements.Add(element);
         }
 
-        //moving element in group
-        public void Moving(FrameworkElement element, Invoker invoker, Canvas paintSurface, Location location)
+        //give smallest
+        public double ReturnSmallest(double first, double last)
         {
+            if (first < last)
+            {
+                return last - first;
+            }
+            else
+            {
+                return first - last;
+            }
+        }
 
+        //moving element in group
+        public FrameworkElement MovingElement(FrameworkElement element, Invoker invoker, Canvas paintSurface, Location location)
+        {
+            FrameworkElement returnelement =null;
             KeyNumber(element, invoker); //move selected at removed
             //create at new location
             if (element.Name == "Rectangle")
@@ -325,6 +357,7 @@ namespace tekenprogramma
                 Canvas.SetLeft(newRectangle, location.x);//set left position
                 Canvas.SetTop(newRectangle, location.y); //set top position 
                 invoker.drawnElements.Add(newRectangle);
+                returnelement = newRectangle;
             }
             else if (element.Name == "Ellipse")
             {
@@ -339,8 +372,50 @@ namespace tekenprogramma
                 Canvas.SetLeft(newEllipse, location.x);//set left position
                 Canvas.SetTop(newEllipse, location.y);//set top position
                 invoker.drawnElements.Add(newEllipse);
+                returnelement = newEllipse;
             }
+            return returnelement;
         }
+
+        public FrameworkElement ResizingElement(FrameworkElement element, Invoker invoker, Canvas paintSurface, Location location)
+        {
+            FrameworkElement returnelement = null;
+            //create at new size
+            if (element.Name == "Rectangle")
+            {
+                Rectangle newRectangle = new Rectangle(); //instance of new rectangle shape
+                newRectangle.AccessKey = invoker.executer.ToString();
+                newRectangle.Width = location.width; //set width
+                newRectangle.Height = location.height; //set height     
+                SolidColorBrush brush = new SolidColorBrush(); //brush
+                brush.Color = Windows.UI.Colors.Yellow; //standard brush color is blue
+                newRectangle.Fill = brush; //fill color
+                newRectangle.Name = "Rectangle"; //attach name
+                Canvas.SetLeft(newRectangle, location.x);
+                Canvas.SetTop(newRectangle, location.y);
+                invoker.drawnElements.Add(newRectangle);
+                returnelement = newRectangle;
+            }
+            else if (element.Name == "Ellipse")
+            {
+                Ellipse newEllipse = new Ellipse(); //instance of new ellipse shape
+                newEllipse.AccessKey = invoker.executer.ToString();
+                newEllipse.Width = location.width; //set width
+                newEllipse.Height = location.height; //set height 
+                SolidColorBrush brush = new SolidColorBrush();//brush
+                brush.Color = Windows.UI.Colors.Yellow;//standard brush color is blue
+                newEllipse.Fill = brush;//fill color
+                newEllipse.Name = "Ellipse";//attach name
+                Canvas.SetLeft(newEllipse, location.x);//set left position
+                Canvas.SetTop(newEllipse, location.y);//set top position
+                invoker.drawnElements.Add(newEllipse);
+                returnelement = newEllipse;
+            }
+            return returnelement;
+        }
+
+
+
 
 
 
@@ -488,6 +563,9 @@ namespace tekenprogramma
             return false;
         }
 
+
+        //double oldWidth = selectedelement.Width();
+        //double oldHeight = selectedelement.Height();
 
         //Location location = this.undoList.Last();
         //this.redoList.Add(location);

@@ -292,10 +292,10 @@ namespace tekenprogramma
         private void ResizingShape(object sender, PointerRoutedEventArgs e)
         {
             Location location = new Location();
-            location.x = e.GetCurrentPoint(paintSurface).Position.X;
-            location.y = e.GetCurrentPoint(paintSurface).Position.Y;
-            location.width = selectedElement.Width;
-            location.height = selectedElement.Height;
+            location.x = Convert.ToDouble(selectedElement.ActualOffset.X);
+            location.y = Convert.ToDouble(selectedElement.ActualOffset.Y);
+            location.width = Convert.ToDouble(selectedElement.Width);
+            location.height = Convert.ToDouble(selectedElement.Height);
             Shape shape = new Shape(location.x, location.y, location.width, location.height);
             ICommand place = new Resize(shape, invoker, e, location, paintSurface, selectedElement);
             this.invoker.Execute(place);

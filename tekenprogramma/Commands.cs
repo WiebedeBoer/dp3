@@ -137,7 +137,7 @@ namespace tekenprogramma
 
         public void Execute()
         {
-            this.shape.Resize(this.invoker, this.e, this.paintSurface, this.location,this.element);
+            this.shape.Resize(this.invoker, this.e, this.paintSurface, this.element);
         }
 
         public void Undo()
@@ -330,12 +330,12 @@ namespace tekenprogramma
 
         public void Undo()
         {
-            this.mycommand.UndoResize(this.invoker);
+            this.mycommand.Undo(this.invoker, this.paintSurface);
         }
 
         public void Redo()
         {
-            this.mycommand.RedoResize(this.invoker);
+            this.mycommand.Redo(this.invoker, this.paintSurface);
         }
     }
 
@@ -364,12 +364,12 @@ namespace tekenprogramma
 
         public void Undo()
         {
-            this.mycommand.UndoMoving(this.invoker);
+            this.mycommand.Undo(this.invoker, this.paintSurface);
         }
 
         public void Redo()
         {
-            this.mycommand.RedoMoving(this.invoker);
+            this.mycommand.Redo(this.invoker, this.paintSurface);
         }
     }
 
