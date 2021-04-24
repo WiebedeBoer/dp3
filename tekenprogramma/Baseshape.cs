@@ -57,12 +57,12 @@ namespace tekenprogramma
         public abstract void Select(PointerRoutedEventArgs e, Canvas paintSurface);
         public abstract void Deselect(PointerRoutedEventArgs e);
 
-        public abstract void Moving(PointerRoutedEventArgs e);
-        public abstract void UndoMoving();
-        public abstract void RedoMoving();
-        public abstract void Resize(PointerRoutedEventArgs e);
-        public abstract void UndoResize();
-        public abstract void RedoResize();
+        //public abstract void Moving(PointerRoutedEventArgs e);
+        //public abstract void UndoMoving();
+        //public abstract void RedoMoving();
+        //public abstract void Resize(PointerRoutedEventArgs e);
+        //public abstract void UndoResize();
+        //public abstract void RedoResize();
 
         public abstract bool GetIfSelected(double x, double y);
         public abstract bool GetHandleIfSelected(double x, double y);

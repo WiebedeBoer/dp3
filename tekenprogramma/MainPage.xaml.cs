@@ -16,17 +16,17 @@ namespace tekenprogramma
 {
     public sealed partial class MainPage : Page
     {
-        string type = "Rectangle";
-        bool selecting = false;
+        string type = "Rectangle"; //creation modus
+        bool selecting = false; //selection modus
+        public Invoker invoker = new Invoker();
+        public List<Shape> selectedShapesList = new List<Shape>();
+        public List<FrameworkElement> selectedElements = new List<FrameworkElement>(); //selected elements list
+        public FrameworkElement selectedElement; //selected element
+
         bool grouping = false;
         Rectangle backuprectangle;
         Ellipse backupellipse;
 
-        public Invoker invoker = new Invoker();
-        public List<Shape> selectedShapesList = new List<Shape>();
-        public FrameworkElement selectedElement;
-        //public List<FrameworkElement> selectedElements = new List<FrameworkElement>();
-        
 
         public MainPage()
         {
@@ -35,16 +35,85 @@ namespace tekenprogramma
 
         private void Drawing_pressed(object sender, PointerRoutedEventArgs e)
         {
-            //if grouping on
-            if (grouping == true)
+            ////if grouping on
+            //if (grouping == true)
+            //{
+            //    grouped(sender, e);
+            //}  
+            ////common shapes
+            //else
+            //{
+            //    non_grouped(sender, e);
+            //}    
+
+            //selecting modus
+            if (selecting == false)
             {
-                grouped(sender, e);
-            }  
-            //common shapes
+                selectedElement = e.OriginalSource as FrameworkElement;
+                //canvas elements
+                if (selectedElement.Name == "Rectangle")
+                {
+                    selecting = true;
+                    //selectedElement.Opacity = 0.6; //fill opacity
+                    //selectedElements.Add(selectedElement);
+                    Selecting(sender, e);
+                }
+                else if (selectedElement.Name == "Ellipse")
+                {
+                    selecting = true;
+                    //selectedElement.Opacity = 0.6; //fill opacity
+                    //selectedElements.Add(selectedElement);
+                    Selecting(sender, e);
+                }
+                //not canvas elements
+                else
+                {
+                    selecting = false;
+                    //move
+                    if (type == "Move")
+                    {
+                        MovingShape(sender, e);
+                    }
+                    //resize
+                    else if (type == "Resize")
+                    {
+                        ResizingShape(sender, e);
+                    }
+                    //make shapes
+                    else if (type == "Rectangle")
+                    {
+                        MakeRectangle(sender, e);
+                    }
+                    else if (type == "Elipse")
+                    {
+                        MakeEllipse(sender, e);
+                    }
+                }
+            }
+            //not selecting modus
             else
             {
-                non_grouped(sender, e);
-            }    
+                selecting = false;
+                //move
+                if (type == "Move")
+                {
+                    MovingShape(sender, e);
+                }
+                //resize
+                else if (type == "Resize")
+                {
+                    ResizingShape(sender, e);
+                }
+                //make
+                else if (type == "Rectangle")
+                {
+                    MakeRectangle(sender, e);
+                }
+                else if (type == "Elipse")
+                {
+                    MakeEllipse(sender, e);
+                }
+            }
 
         }
 
@@ -58,10 +127,14 @@ namespace tekenprogramma
                 //canvas elements
                 if (selectedElement.Name == "Rectangle")
                 {
+                    selecting = true;
+                    //selectedElement.Opacity = 0.6; //fill opacity
                     Selecting(sender, e);
                 }
                 else if (selectedElement.Name == "Ellipse")
                 {
+                    selecting = true;
+                    //selectedElement.Opacity = 0.6; //fill opacity
                     Selecting(sender, e);
                 }
                 //not canvas elements
@@ -115,7 +188,7 @@ namespace tekenprogramma
             }
         }
 
-        //non grouped
+        //grouped
         private void grouped(object sender, PointerRoutedEventArgs e)
         {
             //selecting
@@ -136,7 +209,7 @@ namespace tekenprogramma
                     selectedElement = tmp;
                     //selectElementsList.Add(selectedElement);
                     Group group = new Group(left, top, width, height, "rectangle", 0, 0, paintSurface, invoker, selectedElement);
-                    ICommand place = new MakeGroup(group, paintSurface, invoker, backupprep);
+                    ICommand place = new MakeGroup(group, paintSurface, invoker);
                     this.invoker.Execute(place);
                 }
                 /*
@@ -182,7 +255,7 @@ namespace tekenprogramma
         private void Selecting(object sender, PointerRoutedEventArgs e)
         {
             Shape shape = new Shape(e.GetCurrentPoint(paintSurface).Position.X, e.GetCurrentPoint(paintSurface).Position.Y, 50, 50);
-            ICommand place = new MakeRectangles(shape, this.invoker, paintSurface);
+            ICommand place = new Select(shape, e, this.invoker);
             this.invoker.Execute(place);
         }
 
@@ -303,9 +376,11 @@ namespace tekenprogramma
         {
             FrameworkElement button = e.OriginalSource as FrameworkElement;
             type = button.Name;
-            Canvas newcanvas = new Canvas();
+            //Canvas newcanvas = new Canvas();
             Group group = new Group(0, 0, 0, 0, "group", 0,0, paintSurface,invoker, selectedElement);
-            ICommand place = new MakeGroup(group,paintSurface,invoker,newcanvas);
+            //ICommand place = new MakeGroup(group,paintSurface,invoker,newcanvas);
+            //ICommand place = new MakeGroup(group, paintSurface, invoker, selectedElemenent);
+            ICommand place = new MakeGroup(group, paintSurface, invoker);
             this.invoker.Execute(place);
             grouping = true;
         }

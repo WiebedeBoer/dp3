@@ -30,8 +30,7 @@ namespace tekenprogramma
 
         public FrameworkElement prevelement; //prev element
         public FrameworkElement nextelement; //next element
-
-        public FrameworkElement selectedElement; //selected
+        public FrameworkElement selectedElement; //selected element
 
         //file IO
         public string fileText { get; set; }
@@ -57,6 +56,7 @@ namespace tekenprogramma
         public void Deselect(Invoker invoker, PointerRoutedEventArgs e)
         {
             selectedElement = invoker.selectElementsList.Last();
+            selectedElement.Opacity = 1; //fill opacity
             invoker.selectElementsList.RemoveAt(invoker.selectElementsList.Count() -1);
             invoker.unselectElementsList.Add(selectedElement);
         }
@@ -65,6 +65,7 @@ namespace tekenprogramma
         public void Reselect(Invoker invoker, PointerRoutedEventArgs e)
         {
             selectedElement = invoker.unselectElementsList.Last();
+            selectedElement.Opacity = 0.6; //fill opacity
             invoker.unselectElementsList.RemoveAt(invoker.unselectElementsList.Count() - 1);
             invoker.selectElementsList.Add(selectedElement);
         }
@@ -150,6 +151,7 @@ namespace tekenprogramma
         //new moving shape
         public void Moving(Invoker invoker, Canvas paintSurface, Location location, FrameworkElement element)
         {
+            //FrameworkElement element = invoker.selectElementsList.Last();
             KeyNumber(element, invoker); //move selected at removed
             //create at new location
             if (element.Name == "Rectangle")
@@ -236,8 +238,9 @@ namespace tekenprogramma
         //
 
         //resize shape
-        public void Resize(Invoker invoker, PointerRoutedEventArgs e, FrameworkElement element, Canvas paintSurface, Location location)
+        public void Resize(Invoker invoker, PointerRoutedEventArgs e, Canvas paintSurface, Location location, FrameworkElement element)
         {
+            //FrameworkElement element = invoker.selectElementsList.Last();
             KeyNumber(element, invoker); //move selected at removed
             //calculate size
             double ex = e.GetCurrentPoint(paintSurface).Position.X;

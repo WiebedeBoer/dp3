@@ -101,7 +101,7 @@ namespace tekenprogramma
 
         public void Execute()
         {
-            this.shape.Moving(this.invoker, this.paintSurface, this.location, this.element);
+            this.shape.Moving(this.invoker, this.paintSurface, this.location,this.element);
         }
 
         public void Undo()
@@ -137,7 +137,7 @@ namespace tekenprogramma
 
         public void Execute()
         {
-            this.shape.Resize(this.invoker, this.e, this.element, this.paintSurface, this.location);
+            this.shape.Resize(this.invoker, this.e, this.paintSurface, this.location,this.element);
         }
 
         public void Undo()
@@ -163,6 +163,7 @@ namespace tekenprogramma
         {
             this.e = e;
             this.shape = shape;
+            this.invoker = invoker;
         }
 
         public void Execute()
@@ -275,14 +276,16 @@ namespace tekenprogramma
         private Group mycommand;
         private Canvas selectedCanvas;
         private Invoker invoker;
-        private FrameworkElement element;
+        //private FrameworkElement element;
 
-        public MakeGroup(Group mycommand, Canvas selectedCanvas, Invoker invoker, FrameworkElement element)
+        //public MakeGroup(Group mycommand, Canvas selectedCanvas, Invoker invoker, FrameworkElement element)
+        public MakeGroup(Group mycommand, Canvas selectedCanvas, Invoker invoker)
         {
+            
             this.mycommand = mycommand;
             this.selectedCanvas = selectedCanvas;
             this.invoker = invoker;
-            this.element = element;
+            //this.element = element;
         }
 
         public void Execute()
@@ -292,12 +295,13 @@ namespace tekenprogramma
 
         public void Undo()
         {
-            this.mycommand.UnGroup(this.mycommand, this.selectedCanvas, this.invoker,this.element);
+            //this.mycommand.UnGroup(this.mycommand, this.selectedCanvas, this.invoker,this.element);
+            this.mycommand.UnGroup(this.selectedCanvas, this.invoker);
         }
 
         public void Redo()
         {
-            this.mycommand.Add(this.mycommand);
+            this.mycommand.ReGroup(this.selectedCanvas, this.invoker);
         }
     }
 
@@ -321,17 +325,17 @@ namespace tekenprogramma
 
         public void Execute()
         {
-            this.mycommand.Resize(this.e);
+            this.mycommand.Resize(this.invoker, this.e, this.paintSurface);
         }
 
         public void Undo()
         {
-            this.mycommand.UndoResize();
+            this.mycommand.UndoResize(this.invoker);
         }
 
         public void Redo()
         {
-            this.mycommand.RedoResize();
+            this.mycommand.RedoResize(this.invoker);
         }
     }
 
@@ -355,17 +359,17 @@ namespace tekenprogramma
 
         public void Execute()
         {
-            this.mycommand.Moving(this.e);
+            this.mycommand.Moving(this.invoker,this.e,this.paintSurface);
         }
 
         public void Undo()
         {
-            this.mycommand.UndoMoving();
+            this.mycommand.UndoMoving(this.invoker);
         }
 
         public void Redo()
         {
-            this.mycommand.RedoMoving();
+            this.mycommand.RedoMoving(this.invoker);
         }
     }
 
