@@ -24,6 +24,9 @@ namespace tekenprogramma
         public List<FrameworkElement> selectElementsList = new List<FrameworkElement>();
         public List<FrameworkElement> unselectElementsList = new List<FrameworkElement>();
 
+        //public List<FrameworkElement> groupedElementsList = new List<FrameworkElement>();
+        //public List<FrameworkElement> ungroupedElementsList = new List<FrameworkElement>();
+
         public List<Group> drawnGroups = new List<Group>();
         public List<Group> removedGroups = new List<Group>();
         public List<Group> movedGroups = new List<Group>();

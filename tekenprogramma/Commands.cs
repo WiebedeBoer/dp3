@@ -158,59 +158,33 @@ namespace tekenprogramma
         private PointerRoutedEventArgs e;
         private Shape shape;
         private Invoker invoker;
+        private Canvas paintSurface;
 
-        public Select(Shape shape, PointerRoutedEventArgs e,Invoker invoker)
+        public Select(Shape shape, PointerRoutedEventArgs e,Invoker invoker, Canvas paintSurface)
         {
             this.e = e;
             this.shape = shape;
             this.invoker = invoker;
+            this.paintSurface = paintSurface;
         }
 
         public void Execute()
         {
-            this.shape.Select(this.invoker, this.e);
+            this.shape.Select(this.invoker, this.e, this.paintSurface);
         }
 
         public void Undo()
         {
-            this.shape.Deselect(this.invoker, this.e);
+            this.shape.Deselect(this.invoker, this.e, this.paintSurface);
         }
 
         public void Redo()
         {
-            this.shape.Reselect(this.invoker, this.e);
+            this.shape.Reselect(this.invoker, this.e, this.paintSurface);
         }
     }
 
-    //class select
-    public class Deselect : ICommand
-    {
 
-        private PointerRoutedEventArgs e;
-        private Shape shape;
-        private Invoker invoker;
-
-        public Deselect(Shape shape, PointerRoutedEventArgs e, Invoker invoker)
-        {
-            this.e = e;
-            this.shape = shape;
-        }
-
-        public void Execute()
-        {
-            this.shape.Deselect(this.invoker, this.e);
-        }
-
-        public void Undo()
-        {
-            this.shape.Select(this.invoker, this.e);
-        }
-
-        public void Redo()
-        {
-            this.shape.Deselect(this.invoker, this.e);
-        }
-    }
 
 
     //class saving
@@ -218,26 +192,28 @@ namespace tekenprogramma
     {
         private Shape mycommand;
         private Canvas paintSurface;
+        private Invoker invoker;
 
-        public Saved(Shape mycommand, Canvas paintSurface)
+        public Saved(Shape mycommand, Canvas paintSurface, Invoker invoker)
         {
             this.mycommand = mycommand;
             this.paintSurface = paintSurface;
-        }
+            this.invoker = invoker;
+    }
 
         public void Execute()
         {
-            this.mycommand.Saving(paintSurface);
+            this.mycommand.Saving(paintSurface,invoker);
         }
 
         public void Undo()
         {
-            this.paintSurface.Children.Clear();
+            //this.paintSurface.Children.Clear();
         }
 
         public void Redo()
         {
-            this.paintSurface.Children.Clear();
+            //this.paintSurface.Children.Clear();
         }
     }
 
@@ -261,12 +237,12 @@ namespace tekenprogramma
 
         public void Undo()
         {
-            this.paintSurface.Children.Clear();
+            //this.paintSurface.Children.Clear();
         }
 
         public void Redo()
         {
-            this.paintSurface.Children.Clear();
+            //this.paintSurface.Children.Clear();
         }
     }
 
@@ -372,5 +348,36 @@ namespace tekenprogramma
             this.mycommand.Redo(this.invoker, this.paintSurface);
         }
     }
+
+
+    ////class select
+    //public class Deselect : ICommand
+    //{
+
+    //    private PointerRoutedEventArgs e;
+    //    private Shape shape;
+    //    private Invoker invoker;
+
+    //    public Deselect(Shape shape, PointerRoutedEventArgs e, Invoker invoker)
+    //    {
+    //        this.e = e;
+    //        this.shape = shape;
+    //    }
+
+    //    public void Execute()
+    //    {
+    //        this.shape.Deselect(this.invoker, this.e);
+    //    }
+
+    //    public void Undo()
+    //    {
+    //        this.shape.Select(this.invoker, this.e);
+    //    }
+
+    //    public void Redo()
+    //    {
+    //        this.shape.Deselect(this.invoker, this.e);
+    //    }
+    //}
 
 }

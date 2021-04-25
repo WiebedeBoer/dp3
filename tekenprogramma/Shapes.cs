@@ -17,7 +17,7 @@ using Windows.ApplicationModel.Activation;
 namespace tekenprogramma
 {
 
-
+    //shape class
     public class Shape
     {
         public double x;
@@ -45,30 +45,41 @@ namespace tekenprogramma
         }
 
         // Selects the shape
-        public void Select(Invoker invoker, PointerRoutedEventArgs e)
+        public void Select(Invoker invoker, PointerRoutedEventArgs e, Canvas paintSurface)
         {
             selectedElement = e.OriginalSource as FrameworkElement;
             selectedElement.Opacity = 0.6; //fill opacity
             invoker.selectElementsList.Add(selectedElement);
+            //see if in group
+            Group group = new Group(0, 0, 0, 0, "group", 0, 0, paintSurface, invoker, selectedElement);
+            group.SelectInGroup(selectedElement,invoker);
         }
 
         // Deselects the shape
-        public void Deselect(Invoker invoker, PointerRoutedEventArgs e)
+        public void Deselect(Invoker invoker, PointerRoutedEventArgs e, Canvas paintSurface)
         {
             selectedElement = invoker.selectElementsList.Last();
             selectedElement.Opacity = 1; //fill opacity
             invoker.selectElementsList.RemoveAt(invoker.selectElementsList.Count() -1);
             invoker.unselectElementsList.Add(selectedElement);
+            //see if in group
+            Group group = new Group(0, 0, 0, 0, "group", 0, 0, paintSurface, invoker, selectedElement);
+            group.UnselectGroup(selectedElement, invoker);
         }
 
         // Reselect the shape
-        public void Reselect(Invoker invoker, PointerRoutedEventArgs e)
+        public void Reselect(Invoker invoker, PointerRoutedEventArgs e, Canvas paintSurface)
         {
             selectedElement = invoker.unselectElementsList.Last();
             selectedElement.Opacity = 0.6; //fill opacity
             invoker.unselectElementsList.RemoveAt(invoker.unselectElementsList.Count() - 1);
             invoker.selectElementsList.Add(selectedElement);
+            //see if in group
+            Group group = new Group(0, 0, 0, 0, "group", 0, 0, paintSurface, invoker, selectedElement);
+            group.SelectInGroup(selectedElement,invoker);
         }
+
+
 
         //
         //repaint
@@ -320,38 +331,63 @@ namespace tekenprogramma
             }
         }
 
+
+        //check if element is already in group
+        public int CheckInGroup(Invoker invoker, FrameworkElement element)
+        {
+            int counter = 0;
+            foreach (Group group in invoker.drawnGroups)
+            {
+                if (group.drawnElements.Count() > 0)
+                {
+                    foreach (FrameworkElement groupelement in group.drawnElements)
+                    {
+                        if (groupelement.AccessKey == element.AccessKey)
+                        {
+                            counter++;
+                        }
+                    }
+                }
+            }
+            return counter;
+        }
+
         //
         //saving
         //
-        public async void Saving(Canvas paintSurface)
+        public async void Saving(Canvas paintSurface, Invoker invoker)
         {
 
             try
             {
                 string lines = "";
-
+                //ungrouped and drawn
                 foreach (FrameworkElement child in paintSurface.Children)
                 {
-                    if (child is Rectangle)
+                    int elmcheck = CheckInGroup(invoker, child); //see if already in group
+                    if (elmcheck == 0)
                     {
-                        double top = (double)child.GetValue(Canvas.TopProperty);
-                        double left = (double)child.GetValue(Canvas.LeftProperty);
-                        string str = "rectangle " + left + " " + top + " " + child.Width + " " + child.Height + "\n";
-                        lines += str;
+                        if (child is Rectangle)
+                        {
+                            double top = (double)child.GetValue(Canvas.TopProperty);
+                            double left = (double)child.GetValue(Canvas.LeftProperty);
+                            string str = "rectangle " + left + " " + top + " " + child.Width + " " + child.Height + "\n";
+                            lines += str;
+                        }
+                        else if (child is Ellipse)
+                        {
+                            double top = (double)child.GetValue(Canvas.TopProperty);
+                            double left = (double)child.GetValue(Canvas.LeftProperty);
+                            string str = "ellipse " + left + " " + top + " " + child.Width + " " + child.Height + "\n";
+                            lines += str;
+                        }
                     }
-                    else if (child is Ellipse)
-                    {
-                        double top = (double)child.GetValue(Canvas.TopProperty);
-                        double left = (double)child.GetValue(Canvas.LeftProperty);
-                        string str = "ellipse " + left + " " + top + " " + child.Width + " " + child.Height + "\n";
-                        lines += str;
-                    }
-                    else if (child is Canvas)
-                    {
-                        Group grouping = new Group(0, 0, 0, 0, "group", 0, 0, paintSurface, invoker, selectedElement);
-                        string str = grouping.Display(0);
-                        lines += str;
-                    }
+                }
+                //grouped and drawn
+                foreach (Group group in invoker.drawnGroups)
+                {
+                    string gstr = group.Display(0);
+                    lines += gstr;
                 }
                 //create and write to file
                 Windows.Storage.StorageFolder storageFolder = Windows.Storage.ApplicationData.Current.LocalFolder;
@@ -385,36 +421,59 @@ namespace tekenprogramma
         {
             //clear previous canvas
             paintSurface.Children.Clear();
+            //clear invoker
+            invoker.drawnElements.Clear();
+            invoker.removedElements.Clear();
+            invoker.movedElements.Clear();
+            invoker.selectElementsList.Clear();
+            invoker.unselectElementsList.Clear();
+            invoker.drawnGroups.Clear();
+            invoker.removedGroups.Clear();
+            invoker.movedGroups.Clear();
+            invoker.selectedGroups.Clear();
+            invoker.unselectedGroups.Clear();
+            invoker.executer = 0;
+            invoker.counter = 0;
             //read file
             Windows.Storage.StorageFolder storageFolder = Windows.Storage.ApplicationData.Current.LocalFolder;
             Windows.Storage.StorageFile saveFile = await storageFolder.GetFileAsync("dp2data.txt");
             string text = await Windows.Storage.FileIO.ReadTextAsync(saveFile);
             //load shapes
             string[] readText = Regex.Split(text, "\\n+");
+            int i = 0;
             foreach (string s in readText)
             {
+                invoker.executer++;
+                i++;
                 if (s.Length > 2)
                 {
-                    string[] line = Regex.Split(s, "\\s+");
-                    if (line[0] == "Ellipse")
+                    if (s[0] != '\t')
                     {
-                        this.GetEllipse(s, paintSurface);
+                        string[] line = Regex.Split(s, "\\s+");
+                        if (line[0] == "ellipse")
+                        {
+                            this.GetEllipse(s, paintSurface, invoker);
+                        }
+                        else if (line[0] == "rectangle")
+                        {
+                            this.GetRectangle(s, paintSurface, invoker);
+                        }
+                        else if (line[0] == "group")
+                        {
+                            FrameworkElement selectedElement = null;
+                            Group grouping = new Group(0, 0, 0, 0, "group", 0, invoker.executer, paintSurface, invoker, selectedElement);        
+                            grouping.LoadGroup(grouping, paintSurface, invoker, Convert.ToInt32(line[1]), i, i + Convert.ToInt32(line[1]), text);
+                            
+                        }
                     }
-                    else if(line[0] == "Rectangle")
-                    {
-                        this.GetRectangle(s, paintSurface);
-                    }
-                    else if (line[0] == "Group")
-                    {
-                        Group grouping = new Group(0, 0, 0, 0, "group", 0, Convert.ToInt32(line[1]), paintSurface, invoker, selectedElement);
-                        grouping.MakeGroup(grouping, paintSurface, invoker);
-                    }
+                    
+
                 }
             }
         }
 
         //load ellipse
-        public void GetEllipse(String lines, Canvas paintSurface)
+        public void GetEllipse(String lines, Canvas paintSurface, Invoker invoker)
         {
             string[] line = Regex.Split(lines, "\\s+");
 
@@ -424,6 +483,7 @@ namespace tekenprogramma
             double height = Convert.ToDouble(line[4]);
 
             Ellipse newEllipse = new Ellipse(); //instance of new ellipse shape
+            newEllipse.AccessKey = invoker.executer.ToString();
             newEllipse.Width = width;
             newEllipse.Height = height;
             SolidColorBrush brush = new SolidColorBrush();//brush
@@ -433,10 +493,11 @@ namespace tekenprogramma
             Canvas.SetLeft(newEllipse, x);//set left position
             Canvas.SetTop(newEllipse, y);//set top position
             paintSurface.Children.Add(newEllipse);
+            invoker.drawnElements.Add(newEllipse);
         }
 
         //load rectangle
-        public void GetRectangle(String lines, Canvas paintSurface)
+        public void GetRectangle(String lines, Canvas paintSurface, Invoker invoker)
         {
             string[] line = Regex.Split(lines, "\\s+");
 
@@ -446,6 +507,7 @@ namespace tekenprogramma
             double height = Convert.ToDouble(line[4]);
 
             Rectangle newRectangle = new Rectangle(); //instance of new rectangle shape
+            newRectangle.AccessKey = invoker.executer.ToString();
             newRectangle.Width = width; //set width
             newRectangle.Height = height; //set height     
             SolidColorBrush brush = new SolidColorBrush(); //brush
@@ -455,6 +517,7 @@ namespace tekenprogramma
             Canvas.SetLeft(newRectangle, x); //set left position
             Canvas.SetTop(newRectangle, y); //set top position 
             paintSurface.Children.Add(newRectangle);
+            invoker.drawnElements.Add(newRectangle);
         }
 
     }

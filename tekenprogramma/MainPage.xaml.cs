@@ -35,17 +35,7 @@ namespace tekenprogramma
 
         private void Drawing_pressed(object sender, PointerRoutedEventArgs e)
         {
-            ////if grouping on
-            //if (grouping == true)
-            //{
-            //    grouped(sender, e);
-            //}  
-            ////common shapes
-            //else
-            //{
-            //    non_grouped(sender, e);
-            //}    
-
+ 
             //selecting modus
             if (selecting == false)
             {
@@ -54,88 +44,12 @@ namespace tekenprogramma
                 if (selectedElement.Name == "Rectangle")
                 {
                     selecting = true;
-                    //selectedElement.Opacity = 0.6; //fill opacity
-                    //selectedElements.Add(selectedElement);
-                    Selecting(sender, e);
+                    Selecting(sender, e, selectedElement);
                 }
                 else if (selectedElement.Name == "Ellipse")
                 {
                     selecting = true;
-                    //selectedElement.Opacity = 0.6; //fill opacity
-                    //selectedElements.Add(selectedElement);
-                    Selecting(sender, e);
-                }
-                //not canvas elements
-                else
-                {
-                    selecting = false;
-                    //move
-                    if (type == "Move")
-                    {
-                        MovingShape(sender, e);
-                    }
-                    //resize
-                    else if (type == "Resize")
-                    {
-                        ResizingShape(sender, e);
-                    }
-                    //make shapes
-                    else if (type == "Rectangle")
-                    {
-                        MakeRectangle(sender, e);
-                    }
-                    else if (type == "Elipse")
-                    {
-                        MakeEllipse(sender, e);
-                    }
-                }
-            }
-            //not selecting modus
-            else
-            {
-                selecting = false;
-                //move
-                if (type == "Move")
-                {
-                    MovingShape(sender, e);
-                }
-                //resize
-                else if (type == "Resize")
-                {
-                    ResizingShape(sender, e);
-                }
-                //make
-                else if (type == "Rectangle")
-                {
-                    MakeRectangle(sender, e);
-                }
-                else if (type == "Elipse")
-                {
-                    MakeEllipse(sender, e);
-                }
-            }
-
-        }
-
-        //non grouped
-        private void non_grouped(object sender, PointerRoutedEventArgs e)
-        {
-            //selecting modus
-            if (selecting == false)
-            {
-                selectedElement = e.OriginalSource as FrameworkElement;
-                //canvas elements
-                if (selectedElement.Name == "Rectangle")
-                {
-                    selecting = true;
-                    //selectedElement.Opacity = 0.6; //fill opacity
-                    Selecting(sender, e);
-                }
-                else if (selectedElement.Name == "Ellipse")
-                {
-                    selecting = true;
-                    //selectedElement.Opacity = 0.6; //fill opacity
-                    Selecting(sender, e);
+                    Selecting(sender, e, selectedElement);
                 }
                 //not canvas elements
                 else
@@ -188,71 +102,12 @@ namespace tekenprogramma
             }
         }
 
-        //grouped
-        private void grouped(object sender, PointerRoutedEventArgs e)
-        {
-            //selecting
-            if (selecting == false)
-            {
-                //select shapes
-                FrameworkElement backupprep = e.OriginalSource as FrameworkElement;
-                if (backupprep.Name != "Rectangle" && backupprep.Name !="Ellipse" && backupprep.Name != "paintSurface")
-                {
-                    Rectangle tmp = backupprep as Rectangle;
-                    backuprectangle = tmp;
-                    double top = (double)tmp.GetValue(Canvas.TopProperty);
-                    double left = (double)tmp.GetValue(Canvas.LeftProperty);
-                    double width = tmp.Width;
-                    double height = tmp.Height;
-                    selecting = true;
-                    //selectedShapesList.Add(shape);
-                    selectedElement = tmp;
-                    //selectElementsList.Add(selectedElement);
-                    Group group = new Group(left, top, width, height, "rectangle", 0, 0, paintSurface, invoker, selectedElement);
-                    ICommand place = new MakeGroup(group, paintSurface, invoker);
-                    this.invoker.Execute(place);
-                }
-                /*
-                else if (backupprep.Name == "Ellipse")
-                {
-                    Ellipse tmp = backupprep as Ellipse;
-                    backupellipse = tmp;
-                    double top = (double)tmp.GetValue(Canvas.TopProperty);
-                    double left = (double)tmp.GetValue(Canvas.LeftProperty);
-                    double width = tmp.Width;
-                    double height = tmp.Height;
-
-                    selecting = true;
-                    //selectedShapesList.Add(shape);
-                    selectedElement = tmp;
-                    //selectElementsList.Add(selectedElement);
-                    Group group = new Group(left, top, width, height, "ellipse", 0, 0, paintSurface, invoker, selectedElement);
-                    ICommand place = new MakeGroup(group, paintSurface, invoker);
-                    this.invoker.Execute(place);
-                }
-                */
-
-            }
-            else
-            {
-                //move
-                if (type == "Move")
-                {
-                    MovingGroup(sender, e);
-                    invoker.selectElementsList.Clear();
-                }
-                //resize
-                else if (type == "Resize")
-                {
-                    ResizingGroup(sender, e);
-                    invoker.selectElementsList.Clear();
-                }
-
-            }
-        }
+        //
+        //shapes
+        //
 
         //selecting shape
-        private void Selecting(object sender, PointerRoutedEventArgs e)
+        private void Selecting(object sender, PointerRoutedEventArgs e, FrameworkElement element)
         {
             Shape shape = new Shape(e.GetCurrentPoint(paintSurface).Position.X, e.GetCurrentPoint(paintSurface).Position.Y, 50, 50);
             ICommand place = new Select(shape, e, this.invoker);
@@ -301,6 +156,10 @@ namespace tekenprogramma
             this.invoker.Execute(place);
         }
 
+        //
+        //groups
+        //
+
         //moving group
         private void MovingGroup(object sender, PointerRoutedEventArgs e)
         {
@@ -326,6 +185,10 @@ namespace tekenprogramma
             selectedShapesList.RemoveAt(0);
             selectedElement = null;
         }
+
+        //
+        //clicks
+        //
 
         //move click
         private void Move_Click(object sender, RoutedEventArgs e)
@@ -409,7 +272,7 @@ namespace tekenprogramma
             FrameworkElement button = e.OriginalSource as FrameworkElement;
             type = button.Name;
             Shape command = new Shape(0, 0, 0, 0);
-            ICommand place = new Saved(command, paintSurface);
+            ICommand place = new Saved(command, paintSurface,invoker);
             invoker.Execute(place);
             grouping = false;
         }
@@ -439,6 +302,151 @@ namespace tekenprogramma
         {
 
         }
+
+        ////if grouping on
+        //if (grouping == true)
+        //{
+        //    grouped(sender, e);
+        //}  
+        ////common shapes
+        //else
+        //{
+        //    non_grouped(sender, e);
+        //}   
+
+        ////non grouped
+        //private void non_grouped(object sender, PointerRoutedEventArgs e)
+        //{
+        //    //selecting modus
+        //    if (selecting == false)
+        //    {
+        //        selectedElement = e.OriginalSource as FrameworkElement;
+        //        //canvas elements
+        //        if (selectedElement.Name == "Rectangle")
+        //        {
+        //            selecting = true;
+        //            //selectedElement.Opacity = 0.6; //fill opacity
+        //            Selecting(sender, e);
+        //        }
+        //        else if (selectedElement.Name == "Ellipse")
+        //        {
+        //            selecting = true;
+        //            //selectedElement.Opacity = 0.6; //fill opacity
+        //            Selecting(sender, e);
+        //        }
+        //        //not canvas elements
+        //        else
+        //        {
+        //            selecting = false;
+        //            //move
+        //            if (type == "Move")
+        //            {
+        //                MovingShape(sender, e);
+        //            }
+        //            //resize
+        //            else if (type == "Resize")
+        //            {
+        //                ResizingShape(sender, e);
+        //            }
+        //            //make shapes
+        //            else if (type == "Rectangle")
+        //            {
+        //                MakeRectangle(sender, e);
+        //            }
+        //            else if (type == "Elipse")
+        //            {
+        //                MakeEllipse(sender, e);
+        //            }
+        //        }
+        //    }
+        //    //not selecting modus
+        //    else
+        //    {
+        //        selecting = false;
+        //        //move
+        //        if (type == "Move")
+        //        {
+        //            MovingShape(sender, e);
+        //        }
+        //        //resize
+        //        else if (type == "Resize")
+        //        {
+        //            ResizingShape(sender, e);
+        //        }
+        //        //make
+        //        else if (type == "Rectangle")
+        //        {
+        //            MakeRectangle(sender, e);
+        //        }
+        //        else if (type == "Elipse")
+        //        {
+        //            MakeEllipse(sender, e);
+        //        }
+        //    }
+        //}
+
+        ////grouped
+        //private void grouped(object sender, PointerRoutedEventArgs e)
+        //{
+        //    //selecting
+        //    if (selecting == false)
+        //    {
+        //        //select shapes
+        //        FrameworkElement backupprep = e.OriginalSource as FrameworkElement;
+        //        if (backupprep.Name != "Rectangle" && backupprep.Name !="Ellipse" && backupprep.Name != "paintSurface")
+        //        {
+        //            Rectangle tmp = backupprep as Rectangle;
+        //            backuprectangle = tmp;
+        //            double top = (double)tmp.GetValue(Canvas.TopProperty);
+        //            double left = (double)tmp.GetValue(Canvas.LeftProperty);
+        //            double width = tmp.Width;
+        //            double height = tmp.Height;
+        //            selecting = true;
+        //            //selectedShapesList.Add(shape);
+        //            selectedElement = tmp;
+        //            //selectElementsList.Add(selectedElement);
+        //            Group group = new Group(left, top, width, height, "rectangle", 0, 0, paintSurface, invoker, selectedElement);
+        //            ICommand place = new MakeGroup(group, paintSurface, invoker);
+        //            this.invoker.Execute(place);
+        //        }
+        //        /*
+        //        else if (backupprep.Name == "Ellipse")
+        //        {
+        //            Ellipse tmp = backupprep as Ellipse;
+        //            backupellipse = tmp;
+        //            double top = (double)tmp.GetValue(Canvas.TopProperty);
+        //            double left = (double)tmp.GetValue(Canvas.LeftProperty);
+        //            double width = tmp.Width;
+        //            double height = tmp.Height;
+
+        //            selecting = true;
+        //            //selectedShapesList.Add(shape);
+        //            selectedElement = tmp;
+        //            //selectElementsList.Add(selectedElement);
+        //            Group group = new Group(left, top, width, height, "ellipse", 0, 0, paintSurface, invoker, selectedElement);
+        //            ICommand place = new MakeGroup(group, paintSurface, invoker);
+        //            this.invoker.Execute(place);
+        //        }
+        //        */
+
+        //    }
+        //    else
+        //    {
+        //        //move
+        //        if (type == "Move")
+        //        {
+        //            MovingGroup(sender, e);
+        //            invoker.selectElementsList.Clear();
+        //        }
+        //        //resize
+        //        else if (type == "Resize")
+        //        {
+        //            ResizingGroup(sender, e);
+        //            invoker.selectElementsList.Clear();
+        //        }
+
+        //    }
+        //}
 
     }
 }
