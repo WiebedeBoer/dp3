@@ -441,34 +441,73 @@ namespace tekenprogramma
             //load shapes
             string[] readText = Regex.Split(text, "\\n+");
             int i = 0;
+            //make groups and shapes
             foreach (string s in readText)
             {
-                invoker.executer++;
-                i++;
                 if (s.Length > 2)
                 {
-                    if (s[0] != '\t')
+                    invoker.executer++;
+                    i++;
+                    string notabs = s.Replace("\t", "");
+                    string[] line = Regex.Split(notabs, "\\s+");
+                    //remake shapes
+                    if (line[0] == "ellipse")
                     {
-                        string[] line = Regex.Split(s, "\\s+");
-                        if (line[0] == "ellipse")
+                        Shape shape = new Shape(Convert.ToDouble(line[1]), Convert.ToDouble(line[2]), Convert.ToDouble(line[3]), Convert.ToDouble(line[4]));
+                        ICommand place = new MakeEllipses(shape, this.invoker, paintSurface);
+                        this.invoker.Execute(place);
+                    }
+                    else if (line[0] == "rectangle")
+                    {
+                        Shape shape = new Shape(Convert.ToDouble(line[1]), Convert.ToDouble(line[2]), Convert.ToDouble(line[3]), Convert.ToDouble(line[4]));
+                        ICommand place = new MakeRectangles(shape, this.invoker, paintSurface);
+                        this.invoker.Execute(place);
+                    }
+                    //remake groups
+                    else if (line[0] == "group")
+                    {
+                        FrameworkElement selectedElement = null;
+                        Group group = new Group(0, 0, 0, 0, "group", 0, 0, paintSurface, invoker, selectedElement);
+                        ICommand place = new MakeGroup(group, paintSurface, invoker);
+                        this.invoker.Execute(place);
+                    }   
+                }
+            }
+            int j = 0; //line increment
+            int g = 0;//group increment
+            //re add elements to groups
+            foreach (string s in readText)
+            {
+                if (s.Length > 2)
+                {   
+                    string notabs = s.Replace("\t", "");
+                    string[] line = Regex.Split(notabs, "\\s+");
+                    if (line[0] == "group")
+                    {
+                        GetGroupElements(readText, j, Convert.ToInt32(line[1]), g, invoker);
+                        g++;
+                    }
+                    j++;
+                }
+            }
+            int maingroup = 0; //main group increment
+            int k = 0; //line increment
+            //remake subgroups and add elements
+            foreach (string s in readText)
+            {
+                if (s.Length > 2)
+                {
+                    string[] line = Regex.Split(s, "\\s+");
+                    if (line[0] == "group")
+                    {                    
+                        if (s[0] != '\t')
                         {
-                            this.GetEllipse(s, paintSurface, invoker);
-                        }
-                        else if (line[0] == "rectangle")
-                        {
-                            this.GetRectangle(s, paintSurface, invoker);
-                        }
-                        else if (line[0] == "group")
-                        {
-                            FrameworkElement selectedElement = null;
-                            Group grouping = new Group(0, 0, 0, 0, "group", 0, invoker.executer, paintSurface, invoker, selectedElement);        
-                            grouping.LoadGroup(grouping, paintSurface, invoker, Convert.ToInt32(line[1]), i, i + Convert.ToInt32(line[1]), text);
-                            
+                            GetSubGroups(readText, maingroup, 0, k, k + Convert.ToInt32(line[1]),invoker);
                         }
                     }
-                    
-
+                    maingroup++;
                 }
+                k++;
             }
         }
 
@@ -518,6 +557,49 @@ namespace tekenprogramma
             Canvas.SetTop(newRectangle, y); //set top position 
             paintSurface.Children.Add(newRectangle);
             invoker.drawnElements.Add(newRectangle);
+        }
+
+        //re attach element to group
+        public void GetGroupElements(string[] readText, int start, int stop, int group, Invoker invoker)
+        {
+            Group attachgroup = invoker.drawnGroups[group];
+            for (int i = start; i < stop; i++)
+            {
+                FrameworkElement elm = invoker.drawnElements[i];
+                attachgroup.drawnElements.Add(elm);
+            }
+
+        }
+
+        //re attach subgroups to group
+        public void GetSubGroups(string[] readText, int group, int depth, int start, int stop, Invoker invoker)
+        {
+            Group maingroup = invoker.drawnGroups[group];
+            while(start < stop)
+            {
+                string s = readText[start];
+                string notabs = s.Replace("\t", "");
+                string tab = "\t";
+                int tablength = tab.Length;
+                int notablength = notabs.Length;
+                int slength = s.Length;
+                int subdepth = (slength - notablength) / tablength;
+
+                if (subdepth == (depth + 1))
+                {
+                    string[] line = Regex.Split(notabs, "\\s+");
+                    if (line[0] == "group")
+                    {
+                        group++;
+                        Group subgroup = invoker.drawnGroups[group];
+                        maingroup.addedGroups.Add(subgroup);
+                        invoker.drawnGroups.RemoveAt(group);
+
+                        GetSubGroups(readText, group, depth + 1, start, start + Convert.ToInt32(line[1]), invoker);
+                    }
+                    start++;
+                }
+            }
         }
 
     }

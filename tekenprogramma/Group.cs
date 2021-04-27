@@ -117,7 +117,6 @@ namespace tekenprogramma
 
         }
 
-
         //removed selected group from drawn elements
         public void SelectedGroup(Group group, Invoker invoker)
         {
@@ -135,7 +134,6 @@ namespace tekenprogramma
             invoker.drawnGroups.RemoveAt(number);
         }
 
-
         //un group
         public void UnGroup(Canvas selectedCanvas, Invoker invoker)
         {
@@ -148,7 +146,11 @@ namespace tekenprogramma
                 {
                     //add selected
                     invoker.selectElementsList.Add(elm);
-                    invoker.unselectElementsList.RemoveAt(invoker.unselectElementsList.Count() - 1);
+                    if (invoker.unselectElementsList.Count() >0)
+                    {
+                        invoker.unselectElementsList.RemoveAt(invoker.unselectElementsList.Count() - 1);
+                    }
+                    
                 }
             }
             if (lastgroup.addedGroups.Count() > 0)
@@ -158,7 +160,10 @@ namespace tekenprogramma
                 {
                     //add selected
                     invoker.selectedGroups.Add(selectedgroup);
-                    invoker.unselectedGroups.RemoveAt(invoker.unselectedGroups.Count() - 1);
+                    if (invoker.unselectedGroups.Count() >0)
+                    {
+                        invoker.unselectedGroups.RemoveAt(invoker.unselectedGroups.Count() - 1);
+                    }             
                     invoker.drawnGroups.Add(selectedgroup); //re add to drawn
                 }
             }

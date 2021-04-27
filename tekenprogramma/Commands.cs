@@ -350,6 +350,37 @@ namespace tekenprogramma
     }
 
 
+    //class load group
+    public class LoadGroup : ICommand
+    {
+        private Group mycommand;
+        private Canvas selectedCanvas;
+        private Invoker invoker;
+
+        public LoadGroup(Group mycommand, Canvas selectedCanvas, Invoker invoker)
+        {
+            this.mycommand = mycommand;
+            this.selectedCanvas = selectedCanvas;
+            this.invoker = invoker;
+        }
+
+        public void Execute()
+        {
+            this.mycommand.LoadGroup(this.mycommand, this.selectedCanvas, this.invoker);
+        }
+
+        public void Undo()
+        {
+            this.mycommand.UnloadGroup(this.selectedCanvas, this.invoker);
+        }
+
+        public void Redo()
+        {
+            this.mycommand.ReloadGroup(this.selectedCanvas, this.invoker);
+        }
+    }
+
+
     ////class select
     //public class Deselect : ICommand
     //{
