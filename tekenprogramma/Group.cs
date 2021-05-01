@@ -84,14 +84,14 @@ namespace tekenprogramma
         //make new group
         public void MakeGroup(Group group, Canvas selectedCanvas, Invoker invoker)
         {
-            //if (invoker.selectElementsList.Count() >0)
-            //{
+            if (invoker.selectElementsList.Count() >0)
+            {
                 //get selected elements
                 foreach (FrameworkElement elm in invoker.selectElementsList)
                 //for (int index = 0; index < invoker.selectElementsList.Count(); index++)
                 {
-                    if (invoker.selectElementsList.Count() > 0)
-                    {
+                    //if (invoker.selectElementsList.Count() > 0)
+                    //{
                         //FrameworkElement elm = invoker.selectElementsList[index];
                         elm.Opacity = 0.9;
                         //check if selected is not already grouped element
@@ -103,12 +103,12 @@ namespace tekenprogramma
                         //remove selected
                         invoker.unselectElementsList.Add(elm);
                         //invoker.selectElementsList.RemoveAt(invoker.selectElementsList.Count() - 1);
-                    }
+                    //}
                 
 
                 }
                 invoker.selectElementsList.Clear();
-            //}
+            }
             if (invoker.selectedGroups.Count() > 0)
             {
                 //get selected groups
@@ -117,9 +117,10 @@ namespace tekenprogramma
                     this.addedGroups.Add(selectedgroup);
                     //remove selected
                     invoker.unselectedGroups.Add(selectedgroup);
-                    invoker.selectedGroups.RemoveAt(invoker.selectedGroups.Count() - 1);
+                    //invoker.selectedGroups.RemoveAt(invoker.selectedGroups.Count() - 1);
                     SelectedGroup(selectedgroup, invoker); //remove from drawn groups
                 }
+                invoker.selectedGroups.Clear();
             }
             invoker.drawnGroups.Add(this);
             this.id = invoker.executer; //id
@@ -159,7 +160,7 @@ namespace tekenprogramma
                     {
                         invoker.unselectElementsList.RemoveAt(invoker.unselectElementsList.Count() - 1);
                     }
-                    
+                    //elm.Opacity = 0.5;
                 }
             }
             if (lastgroup.addedGroups.Count() > 0)
@@ -443,6 +444,11 @@ namespace tekenprogramma
                             if (drawn.AccessKey == key)
                             {
                                 invoker.selectedGroups.Add(group);
+                                //remove selected element from list if in group
+                                if (invoker.selectElementsList.Count() >0)
+                                {
+                                    invoker.selectElementsList.RemoveAt(invoker.selectElementsList.Count() - 1);
+                                }                         
                             }
                         }
                     }
