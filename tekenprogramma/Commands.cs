@@ -349,7 +349,7 @@ namespace tekenprogramma
         }
     }
 
-
+    /*
     //class load group
     public class LoadGroup : ICommand
     {
@@ -379,7 +379,7 @@ namespace tekenprogramma
             this.mycommand.ReloadGroup(this.selectedCanvas, this.invoker);
         }
     }
-
+    */
 
     ////class select
     //public class Deselect : ICommand

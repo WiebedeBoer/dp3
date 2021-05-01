@@ -84,22 +84,31 @@ namespace tekenprogramma
         //make new group
         public void MakeGroup(Group group, Canvas selectedCanvas, Invoker invoker)
         {
-            if (invoker.selectElementsList.Count() >0)
-            {
+            //if (invoker.selectElementsList.Count() >0)
+            //{
                 //get selected elements
                 foreach (FrameworkElement elm in invoker.selectElementsList)
+                //for (int index = 0; index < invoker.selectElementsList.Count(); index++)
                 {
-                    //check if selected is not already grouped element
-                    int elmcheck = CheckInGroup(invoker, elm);
-                    if (elmcheck ==0)
+                    if (invoker.selectElementsList.Count() > 0)
                     {
-                        this.drawnElements.Add(elm);
+                        //FrameworkElement elm = invoker.selectElementsList[index];
+                        elm.Opacity = 0.9;
+                        //check if selected is not already grouped element
+                        int elmcheck = CheckInGroup(invoker, elm);
+                        if (elmcheck == 0)
+                        {
+                            this.drawnElements.Add(elm);
+                        }
+                        //remove selected
+                        invoker.unselectElementsList.Add(elm);
+                        //invoker.selectElementsList.RemoveAt(invoker.selectElementsList.Count() - 1);
                     }
-                    //remove selected
-                    invoker.unselectElementsList.Add(elm);
-                    invoker.selectElementsList.RemoveAt(invoker.selectElementsList.Count() - 1);
+                
+
                 }
-            }
+                invoker.selectElementsList.Clear();
+            //}
             if (invoker.selectedGroups.Count() > 0)
             {
                 //get selected groups

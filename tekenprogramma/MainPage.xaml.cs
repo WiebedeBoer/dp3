@@ -37,8 +37,8 @@ namespace tekenprogramma
         {
  
             //selecting modus
-            if (selecting == false)
-            {
+            //if (selecting == false)
+            //{
                 selectedElement = e.OriginalSource as FrameworkElement;
                 //canvas elements
                 if (selectedElement.Name == "Rectangle")
@@ -75,31 +75,31 @@ namespace tekenprogramma
                         MakeEllipse(sender, e);
                     }
                 }
-            }
+            //}
             //not selecting modus
-            else
-            {
-                selecting = false;
-                //move
-                if (type == "Move")
-                {
-                    MovingShape(sender, e);
-                }
-                //resize
-                else if (type == "Resize")
-                {
-                    ResizingShape(sender, e);
-                }
-                //make
-                else if (type == "Rectangle")
-                {
-                    MakeRectangle(sender, e);
-                }
-                else if (type == "Elipse")
-                {
-                    MakeEllipse(sender, e);
-                }
-            }
+            //else
+            //{
+            //    selecting = false;
+            //    //move
+            //    if (type == "Move")
+            //    {
+            //        MovingShape(sender, e);
+            //    }
+            //    //resize
+            //    else if (type == "Resize")
+            //    {
+            //        ResizingShape(sender, e);
+            //    }
+            //    //make
+            //    else if (type == "Rectangle")
+            //    {
+            //        MakeRectangle(sender, e);
+            //    }
+            //    else if (type == "Elipse")
+            //    {
+            //        MakeEllipse(sender, e);
+            //    }
+            //}
         }
 
         //
