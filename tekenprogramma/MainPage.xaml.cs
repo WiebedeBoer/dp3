@@ -62,12 +62,28 @@ namespace tekenprogramma
                     //move
                     if (type == "Move")
                     {
-                        MovingShape(sender, e);
+                        if (invoker.selectedGroups.Count() >0)
+                        {
+                            MovingGroup(sender, e);
+                        }
+                        else
+                        {
+                            MovingShape(sender, e);
+                        }
+                        
                     }
                     //resize
                     else if (type == "Resize")
                     {
-                        ResizingShape(sender, e);
+                        
+                        if (invoker.selectedGroups.Count() > 0)
+                        {
+                            ResizingGroup(sender, e);
+                        }
+                        else
+                        {
+                            ResizingShape(sender, e);
+                        }
                     }
                     //make shapes
                     else if (type == "Rectangle")
@@ -167,27 +183,27 @@ namespace tekenprogramma
         //moving group
         private void MovingGroup(object sender, PointerRoutedEventArgs e)
         {
-            Shape shape = selectedShapesList.First();
+            //Shape shape = selectedShapesList.First();
             Group group = new Group(0,0,0,0,"group",0,0,paintSurface,invoker,selectedElement);
             ICommand place = new MoveGroup(group, e, paintSurface, invoker, selectedElement);
             this.invoker.Execute(place);
-            type = "deselecting";
-            selecting = false;
-            selectedShapesList.RemoveAt(0);
-            selectedElement = null;
+            //type = "deselecting";
+            //selecting = false;
+            //selectedShapesList.RemoveAt(0);
+            //selectedElement = null;
         }
 
         //resizing group
         private void ResizingGroup(object sender, PointerRoutedEventArgs e)
         {
-            Shape shape = selectedShapesList.First();
+            //Shape shape = selectedShapesList.First();
             Group group = new Group(0, 0, 0, 0, "group", 0, 0, paintSurface, invoker, selectedElement);
             ICommand place = new ResizeGroup(group, e, paintSurface, invoker, selectedElement);
             this.invoker.Execute(place);
-            type = "deselecting";
-            selecting = false;
-            selectedShapesList.RemoveAt(0);
-            selectedElement = null;
+            //type = "deselecting";
+            //selecting = false;
+            //selectedShapesList.RemoveAt(0);
+            //selectedElement = null;
         }
 
         //
