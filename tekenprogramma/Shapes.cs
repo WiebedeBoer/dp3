@@ -386,12 +386,12 @@ namespace tekenprogramma
                 //grouped and drawn
                 foreach (Group group in invoker.drawnGroups)
                 {
-                    string gstr = group.Display(0);
+                    string gstr = group.Display(0,group);
                     lines += gstr;
                 }
                 //create and write to file
                 Windows.Storage.StorageFolder storageFolder = Windows.Storage.ApplicationData.Current.LocalFolder;
-                Windows.Storage.StorageFile sampleFile = await storageFolder.CreateFileAsync("dp2data.txt", Windows.Storage.CreationCollisionOption.ReplaceExisting);
+                Windows.Storage.StorageFile sampleFile = await storageFolder.CreateFileAsync("dp3data.txt", Windows.Storage.CreationCollisionOption.ReplaceExisting);
                 await Windows.Storage.FileIO.WriteTextAsync(sampleFile, lines);
             }
             //file errors
@@ -436,7 +436,7 @@ namespace tekenprogramma
             invoker.counter = 0;
             //read file
             Windows.Storage.StorageFolder storageFolder = Windows.Storage.ApplicationData.Current.LocalFolder;
-            Windows.Storage.StorageFile saveFile = await storageFolder.GetFileAsync("dp2data.txt");
+            Windows.Storage.StorageFile saveFile = await storageFolder.GetFileAsync("dp3data.txt");
             string text = await Windows.Storage.FileIO.ReadTextAsync(saveFile);
             //load shapes
             string[] readText = Regex.Split(text, "\\n+");
@@ -454,14 +454,14 @@ namespace tekenprogramma
                     if (line[0] == "ellipse")
                     {
                         Shape shape = new Shape(Convert.ToDouble(line[1]), Convert.ToDouble(line[2]), Convert.ToDouble(line[3]), Convert.ToDouble(line[4]));
-                        ICommand place = new MakeEllipses(shape, this.invoker, paintSurface);
-                        this.invoker.Execute(place);
+                        ICommand place = new MakeEllipses(shape, invoker, paintSurface);
+                        invoker.Execute(place);
                     }
                     else if (line[0] == "rectangle")
                     {
                         Shape shape = new Shape(Convert.ToDouble(line[1]), Convert.ToDouble(line[2]), Convert.ToDouble(line[3]), Convert.ToDouble(line[4]));
-                        ICommand place = new MakeRectangles(shape, this.invoker, paintSurface);
-                        this.invoker.Execute(place);
+                        ICommand place = new MakeRectangles(shape, invoker, paintSurface);
+                        invoker.Execute(place);
                     }
                     //remake groups
                     else if (line[0] == "group")
@@ -469,7 +469,7 @@ namespace tekenprogramma
                         FrameworkElement selectedElement = null;
                         Group group = new Group(0, 0, 0, 0, "group", 0, 0, paintSurface, invoker, selectedElement);
                         ICommand place = new MakeGroup(group, paintSurface, invoker);
-                        this.invoker.Execute(place);
+                        invoker.Execute(place);
                     }   
                 }
             }
@@ -498,10 +498,13 @@ namespace tekenprogramma
                 if (s.Length > 2)
                 {
                     string[] line = Regex.Split(s, "\\s+");
-                    if (line[0] == "group")
-                    {                    
-                        if (s[0] != '\t')
-                        {
+                    int tabcount = s.Length - s.Replace("/", "").Length;
+
+                    //if (s[0] != '\t')
+                    if (tabcount <0)
+                    { 
+                        if (line[0] == "group")
+                        {                    
                             GetSubGroups(readText, maingroup, 0, k, k + Convert.ToInt32(line[1]),invoker);
                         }
                     }

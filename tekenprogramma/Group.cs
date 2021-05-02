@@ -628,7 +628,7 @@ namespace tekenprogramma
         }
 
         //display lines for saving
-        public override string Display(int depth)
+        public override string Display(int depth, Group group)
         {
             //Display group.
             string str = "";
@@ -638,34 +638,44 @@ namespace tekenprogramma
             {
                 str += "\t";
             }
-            str = str + "group" + this.drawnElements.Count() + this.addedGroups.Count() + "\n";
+            int groupcount = group.drawnElements.Count() + group.addedGroups.Count();
+            str = str + "group " + groupcount + "\n";
 
             //Recursively display child nodes.
             depth = depth + 1; //add depth tab
-            foreach (FrameworkElement child in this.drawnElements)
+            if (group.drawnElements.Count() >0)
             {
-                if (child is Rectangle)
+                foreach (FrameworkElement child in group.drawnElements)
                 {
-                    int j = 0;
-                    while (j < depth)
+                    if (child is Rectangle)
                     {
-                        str += "\t";
+                        int j = 0;
+                        while (j < depth)
+                        {
+                            str += "\t";
+                            j++;
+                        }
+                        str = str + "rectangle " + child.ActualOffset.X + " " + child.ActualOffset.Y + " " + child.Width + " " + child.Height + "\n";
                     }
-                    str = str + "rectangle " + child.ActualOffset.X + " " + child.ActualOffset.Y + " " + child.Width + " " + child.Height + "\n";
-                }
-                else if (child is Ellipse)
-                {
-                    int j = 0;
-                    while (j < depth)
+                    //else if (child is Ellipse)
+                    else
                     {
-                        str += "\t";
+                        int j = 0;
+                        while (j < depth)
+                        {
+                            str += "\t";
+                            j++;
+                        }
+                        str = str + "ellipse " + child.ActualOffset.X + " " + child.ActualOffset.Y + " " + child.Width + " " + child.Height + "\n";
                     }
-                    str = str + "ellipse " + child.ActualOffset.X + " " + child.ActualOffset.Y + " " + child.Width + " " + child.Height + "\n";
                 }
             }
-            foreach(Group subgroup in this.addedGroups)
+            if (group.addedGroups.Count() >0)
             {
-                subgroup.Display(depth + 1);
+                foreach (Group subgroup in group.addedGroups)
+                {
+                    subgroup.Display(depth + 1,subgroup);
+                }
             }
             return str;
         }

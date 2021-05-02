@@ -35,25 +35,29 @@ namespace tekenprogramma
 
         private void Drawing_pressed(object sender, PointerRoutedEventArgs e)
         {
- 
+
             //selecting modus
             //if (selecting == false)
             //{
-                selectedElement = e.OriginalSource as FrameworkElement;
+                FrameworkElement checkElement = e.OriginalSource as FrameworkElement;
+
                 //canvas elements
-                if (selectedElement.Name == "Rectangle")
+                if (checkElement.Name == "Rectangle")
                 {
+                    selectedElement = checkElement;
                     selecting = true;
                     Selecting(sender, e, selectedElement);
                 }
-                else if (selectedElement.Name == "Ellipse")
+                else if (checkElement.Name == "Ellipse")
                 {
+                    selectedElement = checkElement;
                     selecting = true;
                     Selecting(sender, e, selectedElement);
                 }
                 //not canvas elements
                 else
                 {
+                    
                     selecting = false;
                     //move
                     if (type == "Move")
