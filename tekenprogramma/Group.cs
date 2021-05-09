@@ -65,7 +65,7 @@ namespace tekenprogramma
 
         public Invoker invoker;
         public FrameworkElement element;
-        public Canvas lastCanvas;
+        //public Canvas lastCanvas;
 
         public Group(double height, double width, double x, double y, string type, int depth, int id, Canvas selectedCanvas, Invoker invoker, FrameworkElement element) : base(height, width, x, y)
         {
