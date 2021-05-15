@@ -84,8 +84,10 @@ namespace tekenprogramma
         //make new group
         public void MakeGroup(Group group, Canvas selectedCanvas, Invoker invoker)
         {
+            int newdepth = 0;
             if (invoker.selectElementsList.Count() >0)
             {
+                newdepth = 1;
                 //get selected elements
                 foreach (FrameworkElement elm in invoker.selectElementsList)
                 //for (int index = 0; index < invoker.selectElementsList.Count(); index++)
@@ -111,6 +113,7 @@ namespace tekenprogramma
             }
             if (invoker.selectedGroups.Count() > 0)
             {
+                newdepth = 1;
                 //get selected groups
                 foreach (Group selectedgroup in invoker.selectedGroups)
                 {
@@ -119,9 +122,14 @@ namespace tekenprogramma
                     invoker.unselectedGroups.Add(selectedgroup);
                     //invoker.selectedGroups.RemoveAt(invoker.selectedGroups.Count() - 1);
                     SelectedGroup(selectedgroup, invoker); //remove from drawn groups
+                    if (selectedgroup.depth > newdepth)
+                    {
+                        newdepth = newdepth + selectedgroup.depth;
+                    }
                 }
                 invoker.selectedGroups.Clear();
             }
+            this.depth = newdepth;
             invoker.drawnGroups.Add(this);
             this.id = invoker.executer; //id
 
@@ -772,56 +780,67 @@ namespace tekenprogramma
         }
 
         //display lines for saving
-        public override string Display(int depth, Group group)
+        public override string Display(int depth, int maxdepth, Group group)
         {
             //Display group.
             string str = "";
-            //Add group.
-            int i = 0;
-            while (i < depth)
+            if (depth <= maxdepth)
             {
-                str += "\t";
-            }
-            int groupcount = group.drawnElements.Count() + group.addedGroups.Count();
-            str = str + "group " + groupcount + "\n";
+                //Add group.
+                int i = 0;
+                while (i < depth)
+                {
+                    str += "\t";
+                }
+                int groupcount = group.drawnElements.Count() + group.addedGroups.Count();
+                str = str + "group " + groupcount + "\n";
 
-            //Recursively display child nodes.
-            depth = depth + 1; //add depth tab
-            if (group.drawnElements.Count() >0)
-            {
-                foreach (FrameworkElement child in group.drawnElements)
+                //Recursively display child nodes.
+                depth = depth + 1; //add depth tab
+                if (group.drawnElements.Count() > 0)
                 {
-                    if (child is Rectangle)
+                    foreach (FrameworkElement child in group.drawnElements)
                     {
-                        int j = 0;
-                        while (j < depth)
+                        if (child is Rectangle)
                         {
-                            str += "\t";
-                            j++;
+                            int j = 0;
+                            while (j < depth)
+                            {
+                                str += "\t";
+                                j++;
+                            }
+                            str = str + "rectangle " + child.ActualOffset.X + " " + child.ActualOffset.Y + " " + child.Width + " " + child.Height + "\n";
                         }
-                        str = str + "rectangle " + child.ActualOffset.X + " " + child.ActualOffset.Y + " " + child.Width + " " + child.Height + "\n";
-                    }
-                    //else if (child is Ellipse)
-                    else
-                    {
-                        int j = 0;
-                        while (j < depth)
+                        //else if (child is Ellipse)
+                        else
                         {
-                            str += "\t";
-                            j++;
+                            int j = 0;
+                            while (j < depth)
+                            {
+                                str += "\t";
+                                j++;
+                            }
+                            str = str + "ellipse " + child.ActualOffset.X + " " + child.ActualOffset.Y + " " + child.Width + " " + child.Height + "\n";
                         }
-                        str = str + "ellipse " + child.ActualOffset.X + " " + child.ActualOffset.Y + " " + child.Width + " " + child.Height + "\n";
                     }
                 }
-            }
-            if (group.addedGroups.Count() >0)
-            {
-                foreach (Group subgroup in group.addedGroups)
+                if (group.addedGroups.Count() > 0)
                 {
-                    subgroup.Display(depth + 1,subgroup);
+                    foreach (Group subgroup in group.addedGroups)
+                    {
+                        string substr = subgroup.Display(depth + 1, maxdepth, subgroup);
+                        str = str + substr;
+                    }
                 }
+                return str;
             }
-            return str;
+            else
+            {
+                return str;
+            }
+
+
+
         }
 
 

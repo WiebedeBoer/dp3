@@ -386,7 +386,7 @@ namespace tekenprogramma
                 //grouped and drawn
                 foreach (Group group in invoker.drawnGroups)
                 {
-                    string gstr = group.Display(0,group);
+                    string gstr = group.Display(0,group.depth,group);
                     lines += gstr;
                 }
                 //create and write to file
