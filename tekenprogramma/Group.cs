@@ -67,7 +67,7 @@ namespace tekenprogramma
         public FrameworkElement element;
         //public Canvas lastCanvas;
 
-        public Group(double height, double width, double x, double y, string type, int depth, int id, Canvas selectedCanvas, Invoker invoker, FrameworkElement element) : base(height, width, x, y)
+        public Group(double height, double width, double x, double y, string type, int depth, int id, Canvas selectedCanvas, Invoker invoker, FrameworkElement element) : base(x, y, width, height)
         {
             this.height = height;
             this.width = width;
@@ -542,22 +542,34 @@ namespace tekenprogramma
             int counter = 0;
             foreach (Group group in invoker.drawnGroups)
             {
-                if (group.drawnElements.Count() >0)
+                if (group.drawnElements.Count() > 0)
                 {
                     foreach (FrameworkElement groupelement in group.drawnElements)
                     {
                         if (groupelement.AccessKey == element.AccessKey)
                         {
                             counter++;
+                            return counter;
                         }
                     }
                 }
-                CheckInSubgroup(group, element.AccessKey);
+                if (group.addedGroups.Count() > 0 && counter == 0)
+                {
+                    foreach (Group subgroup in group.addedGroups)
+                    {
+                        counter = CheckInSubGroup(subgroup, invoker, element);
+                        if (counter > 0)
+                        {
+                            return counter;
+                        }
+                    }
+                }
             }
             return counter;
         }
 
-        public int CheckInSubgroup(Group group, string key)
+        //check if element in sub group
+        public int CheckInSubGroup(Group group, Invoker invoker, FrameworkElement element)
         {
             int counter = 0;
             if (group.drawnElements.Count() > 0)
@@ -567,14 +579,19 @@ namespace tekenprogramma
                     if (groupelement.AccessKey == element.AccessKey)
                     {
                         counter++;
+                        return counter;
                     }
                 }
             }
-            if (group.addedGroups.Count() > 0)
+            if (group.addedGroups.Count() > 0 && counter == 0)
             {
                 foreach (Group subgroup in group.addedGroups)
                 {
-                    counter = subgroup.CheckInSubgroup(subgroup, key);
+                    counter = CheckInSubGroup(subgroup, invoker, element);
+                    if (counter > 0)
+                    {
+                        return counter;
+                    }
                 }
             }
             return counter;
@@ -791,35 +808,33 @@ namespace tekenprogramma
                 while (i < depth)
                 {
                     str += "\t";
+                    i++;
                 }
                 int groupcount = group.drawnElements.Count() + group.addedGroups.Count();
                 str = str + "group " + groupcount + "\n";
 
                 //Recursively display child nodes.
-                depth = depth + 1; //add depth tab
+                int newdepth = depth + 1; //add depth tab
                 if (group.drawnElements.Count() > 0)
                 {
                     foreach (FrameworkElement child in group.drawnElements)
                     {
+
+                        int j = 0;
+                        while (j < newdepth)
+                        {
+                            str += "\t";
+                            j++;
+                        }
                         if (child is Rectangle)
                         {
-                            int j = 0;
-                            while (j < depth)
-                            {
-                                str += "\t";
-                                j++;
-                            }
+
                             str = str + "rectangle " + child.ActualOffset.X + " " + child.ActualOffset.Y + " " + child.Width + " " + child.Height + "\n";
                         }
                         //else if (child is Ellipse)
                         else
                         {
-                            int j = 0;
-                            while (j < depth)
-                            {
-                                str += "\t";
-                                j++;
-                            }
+
                             str = str + "ellipse " + child.ActualOffset.X + " " + child.ActualOffset.Y + " " + child.Width + " " + child.Height + "\n";
                         }
                     }
@@ -828,7 +843,7 @@ namespace tekenprogramma
                 {
                     foreach (Group subgroup in group.addedGroups)
                     {
-                        string substr = subgroup.Display(depth + 1, maxdepth, subgroup);
+                        string substr = subgroup.Display(newdepth, maxdepth, subgroup);
                         str = str + substr;
                     }
                 }

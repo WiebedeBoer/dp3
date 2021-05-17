@@ -33,7 +33,7 @@ namespace tekenprogramma
         public bool handle = false;
 
 
-        public Baseshape(double height, double width, double x, double y)
+        public Baseshape(double x, double y, double width, double height)
         {
             this.height = height;
             this.width = width;
