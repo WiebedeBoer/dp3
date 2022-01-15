@@ -85,11 +85,11 @@ namespace tekenprogramma
         public void MakeGroup(Group group, Canvas selectedCanvas, Invoker invoker)
         {
             int newdepth = 0;
-            if (invoker.selectElementsList.Count() >0)
+            if (invoker.selectElements.Count() >0)
             {
                 newdepth = 1;
                 //get selected elements
-                foreach (FrameworkElement elm in invoker.selectElementsList)
+                foreach (FrameworkElement elm in invoker.selectElements)
                 //for (int index = 0; index < invoker.selectElementsList.Count(); index++)
                 {
                     //if (invoker.selectElementsList.Count() > 0)
@@ -103,13 +103,13 @@ namespace tekenprogramma
                             this.drawnElements.Add(elm);
                         }
                         //remove selected
-                        invoker.unselectElementsList.Add(elm);
+                        invoker.unselectElements.Add(elm);
                         //invoker.selectElementsList.RemoveAt(invoker.selectElementsList.Count() - 1);
                     //}
                 
 
                 }
-                invoker.selectElementsList.Clear();
+                invoker.selectElements.Clear();
             }
             if (invoker.selectedGroups.Count() > 0)
             {
@@ -163,10 +163,10 @@ namespace tekenprogramma
                 foreach (FrameworkElement elm in lastgroup.drawnElements)
                 {
                     //add selected
-                    invoker.selectElementsList.Add(elm);
-                    if (invoker.unselectElementsList.Count() >0)
+                    invoker.selectElements.Add(elm);
+                    if (invoker.unselectElements.Count() >0)
                     {
-                        invoker.unselectElementsList.RemoveAt(invoker.unselectElementsList.Count() - 1);
+                        invoker.unselectElements.RemoveAt(invoker.unselectElements.Count() - 1);
                     }
                     //elm.Opacity = 0.5;
                 }
@@ -199,8 +199,8 @@ namespace tekenprogramma
                 foreach (FrameworkElement elm in lastgroup.drawnElements)
                 {
                     //remove selected
-                    invoker.unselectElementsList.Add(elm);
-                    invoker.selectElementsList.RemoveAt(invoker.selectElementsList.Count() - 1);
+                    invoker.unselectElements.Add(elm);
+                    invoker.selectElements.RemoveAt(invoker.selectElements.Count() - 1);
                 }
             }
             if (lastgroup.addedGroups.Count() > 0)

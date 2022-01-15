@@ -32,8 +32,8 @@ namespace tekenprogramma
         public FrameworkElement nextelement; //next element
         public FrameworkElement selectedElement; //selected element
 
-        public List<FrameworkElement> movedElements = new List<FrameworkElement>();
-        public List<FrameworkElement> unmovedElements = new List<FrameworkElement>();
+        //public List<FrameworkElement> movedElements = new List<FrameworkElement>();
+        //public List<FrameworkElement> unmovedElements = new List<FrameworkElement>();
 
         //file IO
         public string fileText { get; set; }
@@ -47,39 +47,43 @@ namespace tekenprogramma
             this.height = height;
         }
 
-        // Selects the shape
-        public void Select(Invoker invoker, PointerRoutedEventArgs e, Canvas paintSurface)
+        //
+        //selecting
+        //
+
+        // Selects the shape, state 2
+        public void Select(PointerRoutedEventArgs e, Invoker invoker, Canvas paintSurface)
         {
-            selectedElement = e.OriginalSource as FrameworkElement;
+            selectedElement = e.OriginalSource as FrameworkElement;//2af
             selectedElement.Opacity = 0.6; //fill opacity
-            invoker.selectElementsList.Add(selectedElement);
+            invoker.selectElements.Add(selectedElement); //2a+
             //see if in group
             Group group = new Group(0, 0, 0, 0, "group", 0, 0, paintSurface, invoker, selectedElement);
-            group.SelectInGroup(selectedElement,invoker);
+            group.SelectInGroup(selectedElement, invoker);
         }
 
-        // Deselects the shape
-        public void Deselect(Invoker invoker, PointerRoutedEventArgs e, Canvas paintSurface)
+        // Deselects the shape, state 1
+        public void Deselect(Invoker invoker, Canvas paintSurface)
         {
-            selectedElement = invoker.selectElementsList.Last();
+            selectedElement = invoker.selectElements.Last(); //2af  //er1
             selectedElement.Opacity = 1; //fill opacity
-            invoker.selectElementsList.RemoveAt(invoker.selectElementsList.Count() -1);
-            invoker.unselectElementsList.Add(selectedElement);
+            invoker.selectElements.RemoveAt(invoker.selectElements.Count() - 1); //2a-
+            invoker.unselectElements.Add(selectedElement); //2b+
             //see if in group
             Group group = new Group(0, 0, 0, 0, "group", 0, 0, paintSurface, invoker, selectedElement);
             group.UnselectGroup(selectedElement, invoker);
         }
 
-        // Reselect the shape
-        public void Reselect(Invoker invoker, PointerRoutedEventArgs e, Canvas paintSurface)
+        // Reselects the shape, state 2
+        public void Reselect(Invoker invoker, Canvas paintSurface)
         {
-            selectedElement = invoker.unselectElementsList.Last();
+            selectedElement = invoker.unselectElements.Last(); //2bf
             selectedElement.Opacity = 0.6; //fill opacity
-            invoker.unselectElementsList.RemoveAt(invoker.unselectElementsList.Count() - 1);
-            invoker.selectElementsList.Add(selectedElement);
+            invoker.unselectElements.RemoveAt(invoker.unselectElements.Count() - 1); //2b-
+            invoker.selectElements.Add(selectedElement); //2a+
             //see if in group
             Group group = new Group(0, 0, 0, 0, "group", 0, 0, paintSurface, invoker, selectedElement);
-            group.SelectInGroup(selectedElement,invoker);
+            group.SelectInGroup(selectedElement, invoker);
         }
 
 
@@ -87,7 +91,7 @@ namespace tekenprogramma
         //
         //repaint
         //
-        public void Repaint(Invoker invoker, Canvas paintSurface)
+        public void Repaint(Invoker invoker, Canvas paintSurface, Boolean moved)
         {
             paintSurface.Children.Clear();
             foreach (FrameworkElement drawelement in invoker.drawnElements)
@@ -100,11 +104,11 @@ namespace tekenprogramma
         //creation
         //
 
-        //create rectangle
+        //create rectangle, state 1
         public void MakeRectangle(Invoker invoker, Canvas paintSurface)
         {
             Rectangle newRectangle = new Rectangle(); //instance of new rectangle shape
-            newRectangle.AccessKey = invoker.executer.ToString();
+            newRectangle.AccessKey = invoker.executer.ToString(); //access key
             newRectangle.Width = width; //set width
             newRectangle.Height = height; //set height     
             SolidColorBrush brush = new SolidColorBrush(); //brush
@@ -113,70 +117,72 @@ namespace tekenprogramma
             newRectangle.Name = "Rectangle"; //attach name
             Canvas.SetLeft(newRectangle, x); //set left position
             Canvas.SetTop(newRectangle, y); //set top position 
-            invoker.drawnElements.Add(newRectangle);
-            Repaint(invoker, paintSurface); //repaint
+            invoker.drawnElements.Add(newRectangle); //add to drawn, 1+
+            //repaint surface
+            Repaint(invoker, paintSurface, false); //repaint           
         }
 
-        //create ellipse
+        //create ellipse, state 1
         public void MakeEllipse(Invoker invoker, Canvas paintSurface)
         {
             Ellipse newEllipse = new Ellipse(); //instance of new ellipse shape
-            newEllipse.AccessKey = invoker.executer.ToString();
-            newEllipse.Width = width;
-            newEllipse.Height = height;
+            newEllipse.AccessKey = invoker.executer.ToString(); //access key
+            newEllipse.Width = width; //set width
+            newEllipse.Height = height; //set height
             SolidColorBrush brush = new SolidColorBrush();//brush
             brush.Color = Windows.UI.Colors.Blue;//standard brush color is blue
             newEllipse.Fill = brush;//fill color
             newEllipse.Name = "Ellipse";//attach name
             Canvas.SetLeft(newEllipse, x);//set left position
             Canvas.SetTop(newEllipse, y);//set top position   
-            invoker.drawnElements.Add(newEllipse);
-            Repaint(invoker, paintSurface); //repaint
+            invoker.drawnElements.Add(newEllipse); //add to drawn, 1+
+            //repaint surface
+            Repaint(invoker, paintSurface, false);
         }
 
         //
-        //undo redo
+        //undo redo of create
         //
 
-        //undo create
+        //undo create, state 0
         public void Remove(Invoker invoker, Canvas paintSurface)
         {
             //remove previous
-            prevelement = invoker.drawnElements.Last();
-            invoker.removedElements.Add(prevelement);
-            invoker.drawnElements.RemoveAt(invoker.drawnElements.Count() - 1);
-            Repaint(invoker, paintSurface); //repaint
+            prevelement = invoker.drawnElements.Last(); //1f  //err 3
+            invoker.removedElements.Add(prevelement); //0+
+            invoker.drawnElements.RemoveAt(invoker.drawnElements.Count() - 1); //1-
+            //repaint surface
+            Repaint(invoker, paintSurface, false);
         }
 
-        //redo create
+        //redo create, state 1
         public void Add(Invoker invoker, Canvas paintSurface)
         {
             //create next
-            nextelement = invoker.removedElements.Last();
-            invoker.drawnElements.Add(nextelement);
-            invoker.removedElements.RemoveAt(invoker.removedElements.Count() - 1);
-            Repaint(invoker, paintSurface); //repaint
+            nextelement = invoker.removedElements.Last(); //0f
+            invoker.drawnElements.Add(nextelement); //1+
+            invoker.removedElements.RemoveAt(invoker.removedElements.Count() - 1); //0-
+            //repaint surface
+            Repaint(invoker, paintSurface, false);
         }
 
         //
-        //moving
+        //moving, state 3
         //
 
         //new moving shape
-        public void Moving(Invoker invoker, Canvas paintSurface, Location location, FrameworkElement element)
+        public void Moving(Invoker invoker, Canvas paintSurface, Location location, FrameworkElement clickedelement)
         {
-            //FrameworkElement element = invoker.selectElementsList.Last();
-            KeyNumber(element, invoker); //move selected at removed
+            //remove selected element from drawn
+            KeyNumber(clickedelement, invoker); //1-
+            //add selected to unselect
+            invoker.unselectElements.Add(clickedelement); //2b+
+            //remove from selected
+            invoker.selectElements.RemoveAt(invoker.selectElements.Count() - 1); //2a-
+            //add to moved
+            invoker.movedElements.Add(clickedelement); //3a+
             //create at new location
-            MovingElement(element, invoker, paintSurface, location);
-            Repaint(invoker, paintSurface); //repaint
-        }
-
-
-        public FrameworkElement MovingElement(FrameworkElement element, Invoker invoker, Canvas paintSurface, Location location)
-        {
-            FrameworkElement returnelement = null;
-            if (element.Name == "Rectangle")
+            if (clickedelement.Name == "Rectangle")
             {
                 Rectangle newRectangle = new Rectangle(); //instance of new rectangle shape
                 newRectangle.AccessKey = invoker.executer.ToString();
@@ -187,11 +193,13 @@ namespace tekenprogramma
                 newRectangle.Fill = brush; //fill color
                 newRectangle.Name = "Rectangle"; //attach name
                 Canvas.SetLeft(newRectangle, location.x);//set left position
-                Canvas.SetTop(newRectangle, location.y); //set top position          
-                invoker.drawnElements.Add(newRectangle);
-                returnelement = newRectangle;
+                Canvas.SetTop(newRectangle, location.y); //set top position
+                //add new to drawn
+                invoker.drawnElements.Add(newRectangle); //1+
+                //add undo
+                invoker.unmovedElements.Add(newRectangle); //3b+
             }
-            else if (element.Name == "Ellipse")
+            else if (clickedelement.Name == "Ellipse")
             {
                 Ellipse newEllipse = new Ellipse(); //instance of new ellipse shape
                 newEllipse.AccessKey = invoker.executer.ToString();
@@ -203,11 +211,13 @@ namespace tekenprogramma
                 newEllipse.Name = "Ellipse";//attach name
                 Canvas.SetLeft(newEllipse, location.x);//set left position
                 Canvas.SetTop(newEllipse, location.y);//set top position
-                invoker.drawnElements.Add(newEllipse);
-                returnelement = newEllipse;
+                //add new to drawn
+                invoker.drawnElements.Add(newEllipse); //1+
+                //add undo
+                invoker.unmovedElements.Add(newEllipse); //3b+
             }
-            this.movedElements.Add(returnelement);
-            return returnelement;
+            //repaint surface
+            Repaint(invoker, paintSurface, true);
         }
 
         //remove selected element by access key
@@ -225,121 +235,116 @@ namespace tekenprogramma
                 inc++;
             }
             invoker.drawnElements.RemoveAt(number);
-            invoker.removedElements.Add(element);
-            invoker.movedElements.Add(element);
+            //invoker.removedElements.Add(element);
+            //invoker.movedElements.Add(element);
         }
 
-        //move back element
+        //move back element, state 2
         public void MoveBack(Invoker invoker, Canvas paintSurface)
         {
-            //remove next
-            prevelement = invoker.drawnElements.Last();
-            this.unmovedElements.Add(prevelement);
-            invoker.drawnElements.RemoveAt(invoker.drawnElements.Count() - 1);
-            //move back moved element
-            nextelement = this.movedElements.Last();
-            this.movedElements.RemoveAt(this.movedElements.Count() - 1);
-            invoker.drawnElements.Add(nextelement);
-            Repaint(invoker, paintSurface); //repaint  
-            ////remove next
-            //prevelement = invoker.drawnElements.Last();
-            //invoker.removedElements.Add(prevelement);
-            //invoker.drawnElements.RemoveAt(invoker.drawnElements.Count() - 1);
-            ////move back moved element
-            //nextelement = invoker.movedElements.Last();
-            //invoker.movedElements.RemoveAt(invoker.movedElements.Count() - 1);
-            //invoker.drawnElements.Add(nextelement);
-            //Repaint(invoker, paintSurface); //repaint   
+            //shuffle unselected
+            prevelement = invoker.movedElements.Last();
+            invoker.unselectElements.RemoveAt(invoker.unselectElements.Count() - 1); //2b-
+            invoker.selectElements.Add(prevelement); //2a+
+            //shuffle moved
+            nextelement = invoker.unmovedElements.Last();
+            invoker.movedElements.RemoveAt(invoker.movedElements.Count() - 1); //3a-
+            invoker.unmovedElements.RemoveAt(invoker.unmovedElements.Count() - 1); //3b-
+            //add redo
+            invoker.undoElements.Add(nextelement); //4a+
+            invoker.redoElements.Add(prevelement); //4b+
+            //remove and add to drawn
+            KeyNumber(nextelement, invoker); //1-
+            invoker.drawnElements.Add(prevelement); //1+
+            //repaint surface
+            Repaint(invoker, paintSurface, false);
         }
 
-        //move back element
+        //move back element, state 3
         public void MoveAgain(Invoker invoker, Canvas paintSurface)
         {
-            //remove previous
-            prevelement = invoker.drawnElements.Last();
-            nextelement = this.unmovedElements.Last();
-            this.unmovedElements.Add(prevelement);
-            this.movedElements.Add(prevelement);
-            invoker.drawnElements.RemoveAt(invoker.drawnElements.Count() - 1);
-            //move again moved element
-            invoker.drawnElements.Add(nextelement);
-            Repaint(invoker, paintSurface); //repaint   
-            ////remove previous
-            //prevelement = invoker.drawnElements.Last();
-            //nextelement = invoker.removedElements.Last();
-            //invoker.removedElements.Add(prevelement);
-            //invoker.movedElements.Add(prevelement);
-            //invoker.drawnElements.RemoveAt(invoker.drawnElements.Count() - 1);
-            ////move again moved element
-            //invoker.drawnElements.Add(nextelement);
-            //Repaint(invoker, paintSurface); //repaint   
+            //shuffle selected
+            nextelement = invoker.undoElements.Last();
+            invoker.unselectElements.Add(nextelement); //2b+
+            invoker.selectElements.RemoveAt(invoker.selectElements.Count() - 1); //2a-
+            //shuffle moved
+            prevelement = invoker.redoElements.Last();
+            invoker.movedElements.Add(prevelement); //3a+
+            invoker.unmovedElements.Add(nextelement); //3b+
+            //undo redo
+            invoker.undoElements.RemoveAt(invoker.undoElements.Count() - 1); ; //4a-
+            invoker.redoElements.RemoveAt(invoker.redoElements.Count() - 1); ; //4b-
+            //remove and add to drawn
+            KeyNumber(prevelement, invoker); //1-
+            invoker.drawnElements.Add(nextelement); //1+
+            //repaint surface
+            Repaint(invoker, paintSurface, false);
         }
 
         //
         //resizing
         //
 
-        //resize shape
-        public void Resize(Invoker invoker, PointerRoutedEventArgs e, Canvas paintSurface, FrameworkElement element)
+        //resize shape, state 3
+        public void Resize(Invoker invoker, PointerRoutedEventArgs e, FrameworkElement clickedelement, Canvas paintSurface, Location location)
         {
-            //FrameworkElement element = invoker.selectElementsList.Last();
-            KeyNumber(element, invoker); //move selected at removed
-
+            //remove selected element from drawn
+            KeyNumber(clickedelement, invoker); //1-
+            //add selected to unselect
+            invoker.unselectElements.Add(clickedelement); //2b+
+            //remove from selected
+            invoker.selectElements.RemoveAt(invoker.selectElements.Count() - 1); //2a-
+            //add to moved
+            invoker.movedElements.Add(clickedelement); //3a+
             //calculate size
             double ex = e.GetCurrentPoint(paintSurface).Position.X;
             double ey = e.GetCurrentPoint(paintSurface).Position.Y;
-            double lw = Convert.ToDouble(element.ActualOffset.X); //set width
-            double lh = Convert.ToDouble(element.ActualOffset.Y); //set height
+            double lw = Convert.ToDouble(clickedelement.ActualOffset.X); //set width
+            double lh = Convert.ToDouble(clickedelement.ActualOffset.Y); //set height
             double w = ReturnSmallest(ex, lw);
             double h = ReturnSmallest(ey, lh);
-
-            Location location = new Location();
-            location.x = Convert.ToDouble(element.ActualOffset.X);
-            location.y = Convert.ToDouble(element.ActualOffset.Y);
-            location.width = w;
-            location.height = h;
-
-            ResizingElement(invoker, e, paintSurface, location, element);
-            Repaint(invoker, paintSurface); //repaint
-        }
-
-        public FrameworkElement ResizingElement(Invoker invoker, PointerRoutedEventArgs e, Canvas paintSurface, Location location, FrameworkElement element)
-        {
-            FrameworkElement returnelement = null;
             //create at new size
-            if (element.Name == "Rectangle")
+            if (clickedelement.Name == "Rectangle")
             {
                 Rectangle newRectangle = new Rectangle(); //instance of new rectangle shape
                 newRectangle.AccessKey = invoker.executer.ToString();
-                newRectangle.Width = location.width; //set width
-                newRectangle.Height = location.height; //set height     
+                newRectangle.Width = w; //set width
+                newRectangle.Height = h; //set height     
                 SolidColorBrush brush = new SolidColorBrush(); //brush
                 brush.Color = Windows.UI.Colors.Yellow; //standard brush color is blue
                 newRectangle.Fill = brush; //fill color
                 newRectangle.Name = "Rectangle"; //attach name
-                Canvas.SetLeft(newRectangle, location.x);
-                Canvas.SetTop(newRectangle, location.y);
-                invoker.drawnElements.Add(newRectangle);
-                returnelement = newRectangle;
+                Canvas.SetLeft(newRectangle, lw); //set left position
+                Canvas.SetTop(newRectangle, lh);//set top position
+                //add to drawn
+                invoker.drawnElements.Add(newRectangle); //1+
+                //add undo
+                invoker.unmovedElements.Add(newRectangle); //3b+
             }
-            else if (element.Name == "Ellipse")
+            else if (clickedelement.Name == "Ellipse")
             {
                 Ellipse newEllipse = new Ellipse(); //instance of new ellipse shape
                 newEllipse.AccessKey = invoker.executer.ToString();
-                newEllipse.Width = location.width; //set width
-                newEllipse.Height = location.height; //set height 
+                newEllipse.Width = w; //set width
+                newEllipse.Height = h; //set height 
                 SolidColorBrush brush = new SolidColorBrush();//brush
                 brush.Color = Windows.UI.Colors.Yellow;//standard brush color is blue
                 newEllipse.Fill = brush;//fill color
                 newEllipse.Name = "Ellipse";//attach name
-                Canvas.SetLeft(newEllipse, location.x);//set left position
-                Canvas.SetTop(newEllipse, location.y);//set top position
-                invoker.drawnElements.Add(newEllipse);
-                returnelement = newEllipse;
+                Canvas.SetLeft(newEllipse, lw);//set left position
+                Canvas.SetTop(newEllipse, lh);//set top position
+                //add to drawn
+                invoker.drawnElements.Add(newEllipse); //1+
+                //add undo
+                invoker.unmovedElements.Add(newEllipse); //3b+
             }
-            this.movedElements.Add(returnelement);
-            return returnelement;
+            //repaint surface
+            Repaint(invoker, paintSurface, true);
         }
+
+        //
+        //miscellaneous
+        //
 
         //give smallest
         public double ReturnSmallest(double first, double last)
@@ -490,8 +495,8 @@ namespace tekenprogramma
             invoker.drawnElements.Clear();
             invoker.removedElements.Clear();
             invoker.movedElements.Clear();
-            invoker.selectElementsList.Clear();
-            invoker.unselectElementsList.Clear();
+            invoker.selectElements.Clear();
+            invoker.unselectElements.Clear();
             invoker.drawnGroups.Clear();
             invoker.removedGroups.Clear();
             invoker.movedGroups.Clear();
