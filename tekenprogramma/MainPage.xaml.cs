@@ -153,27 +153,36 @@ namespace tekenprogramma
         //moving shape
         private void MovingShape(object sender, PointerRoutedEventArgs e)
         {
-            Location location = new Location();
-            location.x = e.GetCurrentPoint(paintSurface).Position.X;
-            location.y = e.GetCurrentPoint(paintSurface).Position.Y;
-            location.width = selectedElement.Width;
-            location.height = selectedElement.Height;
-            Shape shape = new Shape(location.x, location.y, location.width, location.height);
-            ICommand place = new Moving(shape, invoker, location, paintSurface, selectedElement);
-            this.invoker.Execute(place);
+            if (selectedElements.Count() >0)
+            {
+                Location location = new Location();
+                location.x = e.GetCurrentPoint(paintSurface).Position.X;
+                location.y = e.GetCurrentPoint(paintSurface).Position.Y;
+                location.width = selectedElement.Width;
+                location.height = selectedElement.Height;
+                Shape shape = new Shape(location.x, location.y, location.width, location.height);
+                ICommand place = new Moving(shape, invoker, location, paintSurface, selectedElement);
+                this.invoker.Execute(place);
+            }
+            
+
         }
 
         //resizing shape
         private void ResizingShape(object sender, PointerRoutedEventArgs e)
         {
-            Location location = new Location();
-            location.x = Convert.ToDouble(selectedElement.ActualOffset.X);
-            location.y = Convert.ToDouble(selectedElement.ActualOffset.Y);
-            location.width = Convert.ToDouble(selectedElement.Width);
-            location.height = Convert.ToDouble(selectedElement.Height);
-            Shape shape = new Shape(location.x, location.y, location.width, location.height);
-            ICommand place = new Resize(shape, invoker, e, location, paintSurface, selectedElement);
-            this.invoker.Execute(place);
+            if (selectedElements.Count() > 0)
+            {
+                Location location = new Location();
+                location.x = Convert.ToDouble(selectedElement.ActualOffset.X);
+                location.y = Convert.ToDouble(selectedElement.ActualOffset.Y);
+                location.width = Convert.ToDouble(selectedElement.Width);
+                location.height = Convert.ToDouble(selectedElement.Height);
+                Shape shape = new Shape(location.x, location.y, location.width, location.height);
+                ICommand place = new Resize(shape, invoker, e, location, paintSurface, selectedElement);
+                this.invoker.Execute(place);
+            }
+
         }
 
         //
@@ -183,27 +192,35 @@ namespace tekenprogramma
         //moving group
         private void MovingGroup(object sender, PointerRoutedEventArgs e)
         {
-            //Shape shape = selectedShapesList.First();
-            Group group = new Group(0,0,0,0,"group",0,0,paintSurface,invoker,selectedElement);
-            ICommand place = new MoveGroup(group, e, paintSurface, invoker, selectedElement);
-            this.invoker.Execute(place);
-            //type = "deselecting";
-            //selecting = false;
-            //selectedShapesList.RemoveAt(0);
-            //selectedElement = null;
+            if (selectedElements.Count() > 0)
+            {
+                //Shape shape = selectedShapesList.First();
+                Group group = new Group(0, 0, 0, 0, "group", 0, 0, paintSurface, invoker, selectedElement);
+                ICommand place = new MoveGroup(group, e, paintSurface, invoker, selectedElement);
+                this.invoker.Execute(place);
+                //type = "deselecting";
+                //selecting = false;
+                //selectedShapesList.RemoveAt(0);
+                //selectedElement = null;
+            }
+
         }
 
         //resizing group
         private void ResizingGroup(object sender, PointerRoutedEventArgs e)
         {
-            //Shape shape = selectedShapesList.First();
-            Group group = new Group(0, 0, 0, 0, "group", 0, 0, paintSurface, invoker, selectedElement);
-            ICommand place = new ResizeGroup(group, e, paintSurface, invoker, selectedElement);
-            this.invoker.Execute(place);
-            //type = "deselecting";
-            //selecting = false;
-            //selectedShapesList.RemoveAt(0);
-            //selectedElement = null;
+            if (selectedElements.Count() > 0)
+            {
+                //Shape shape = selectedShapesList.First();
+                Group group = new Group(0, 0, 0, 0, "group", 0, 0, paintSurface, invoker, selectedElement);
+                ICommand place = new ResizeGroup(group, e, paintSurface, invoker, selectedElement);
+                this.invoker.Execute(place);
+                //type = "deselecting";
+                //selecting = false;
+                //selectedShapesList.RemoveAt(0);
+                //selectedElement = null;
+            }
+
         }
 
         //
@@ -257,15 +274,19 @@ namespace tekenprogramma
         //group click
         private void Group_Click(object sender, RoutedEventArgs e)
         {
-            FrameworkElement button = e.OriginalSource as FrameworkElement;
-            type = button.Name;
-            //Canvas newcanvas = new Canvas();
-            Group group = new Group(0, 0, 0, 0, "group", 0,0, paintSurface,invoker, selectedElement);
-            //ICommand place = new MakeGroup(group,paintSurface,invoker,newcanvas);
-            //ICommand place = new MakeGroup(group, paintSurface, invoker, selectedElemenent);
-            ICommand place = new MakeGroup(group, paintSurface, invoker);
-            this.invoker.Execute(place);
-            grouping = true;
+            if (selectedElements.Count() > 0)
+            {
+                FrameworkElement button = e.OriginalSource as FrameworkElement;
+                type = button.Name;
+                //Canvas newcanvas = new Canvas();
+                Group group = new Group(0, 0, 0, 0, "group", 0, 0, paintSurface, invoker, selectedElement);
+                //ICommand place = new MakeGroup(group,paintSurface,invoker,newcanvas);
+                //ICommand place = new MakeGroup(group, paintSurface, invoker, selectedElemenent);
+                ICommand place = new MakeGroup(group, paintSurface, invoker);
+                this.invoker.Execute(place);
+                grouping = true;
+            }
+
         }
 
         //undo click
