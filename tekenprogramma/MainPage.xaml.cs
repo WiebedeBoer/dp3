@@ -153,7 +153,7 @@ namespace tekenprogramma
         //moving shape
         private void MovingShape(object sender, PointerRoutedEventArgs e)
         {
-            if (selectedElements.Count() >0)
+            if (invoker.selectElements.Count() >0)
             {
                 Location location = new Location();
                 location.x = e.GetCurrentPoint(paintSurface).Position.X;
@@ -171,7 +171,7 @@ namespace tekenprogramma
         //resizing shape
         private void ResizingShape(object sender, PointerRoutedEventArgs e)
         {
-            if (selectedElements.Count() > 0)
+            if (invoker.selectElements.Count() > 0)
             {
                 Location location = new Location();
                 location.x = Convert.ToDouble(selectedElement.ActualOffset.X);
@@ -192,7 +192,7 @@ namespace tekenprogramma
         //moving group
         private void MovingGroup(object sender, PointerRoutedEventArgs e)
         {
-            if (selectedElements.Count() > 0)
+            if (invoker.selectElements.Count() > 0)
             {
                 //Shape shape = selectedShapesList.First();
                 Group group = new Group(0, 0, 0, 0, "group", 0, 0, paintSurface, invoker, selectedElement);
@@ -209,7 +209,7 @@ namespace tekenprogramma
         //resizing group
         private void ResizingGroup(object sender, PointerRoutedEventArgs e)
         {
-            if (selectedElements.Count() > 0)
+            if (invoker.selectElements.Count() > 0)
             {
                 //Shape shape = selectedShapesList.First();
                 Group group = new Group(0, 0, 0, 0, "group", 0, 0, paintSurface, invoker, selectedElement);
@@ -274,7 +274,7 @@ namespace tekenprogramma
         //group click
         private void Group_Click(object sender, RoutedEventArgs e)
         {
-            if (selectedElements.Count() > 0)
+            if (invoker.selectElements.Count() > 0)
             {
                 FrameworkElement button = e.OriginalSource as FrameworkElement;
                 type = button.Name;
