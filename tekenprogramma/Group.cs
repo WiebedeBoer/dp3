@@ -225,7 +225,9 @@ namespace tekenprogramma
         //moving
         public void Moving(Invoker invoker, PointerRoutedEventArgs e, Canvas paintSurface, FrameworkElement selectedelement)
         {
-            //FrameworkElement selectedelement = invoker.selectElementsList.Last();
+            //prepare undo
+            PrepareUndo(invoker);
+            //moving
             Group selectedgroup = invoker.selectedGroups.Last();
             invoker.removedGroups.Add(selectedgroup);
             //calculate difference in location
@@ -244,22 +246,8 @@ namespace tekenprogramma
                     invoker.executer++;//acceskey add
                     FrameworkElement madeElement = MovingElement(movedElement, invoker, paintSurface, location);
                     selectedgroup.movedElements.Add(madeElement);
-                    //selectedgroup.drawnElements.Add(madeElement);
-                    //invoker.movedElements.Add(movedElement);
                 }
-                //selectedgroup.drawnElements.Clear();
             }
-            //if (selectedgroup.movedElements.Count() >0)
-            //{
-            //    foreach (FrameworkElement drewElement in selectedgroup.movedElements)
-            //    {
-            //        selectedgroup.drawnElements.Add(drewElement);
-            //    }
-            //}
-
-            //remove selected element
-            //invoker.unselectElementsList.Add(selectedelement);
-            //invoker.selectElementsList.RemoveAt(invoker.selectElementsList.Count() - 1);
 
             if (selectedgroup.addedGroups.Count() >0)
             {
@@ -312,10 +300,48 @@ namespace tekenprogramma
         //undo redo move resize
         //
 
+        //prepare undo
+        public void PrepareUndo(Invoker invoker)
+        {
+            List<FrameworkElement> PrepareUndo = new List<FrameworkElement>();
+            foreach (FrameworkElement drawelement in invoker.drawnElements)
+            {
+                PrepareUndo.Add(drawelement); //add
+            }
+            invoker.undoElementsList.Add(PrepareUndo);
+        }
+
         //undo moving or resizing
         public void Undo(Invoker invoker, Canvas paintSurface)
         {
+            List<FrameworkElement> lastUndo = invoker.undoElementsList.Last();
+            invoker.redoElementsList.Add(lastUndo);
+            invoker.undoElementsList.RemoveAt(invoker.undoElementsList.Count() - 1);
+            paintSurface.Children.Clear();
+            foreach (FrameworkElement drawelement in lastUndo)
+            {
+                paintSurface.Children.Add(drawelement); //add
+            }
 
+            /*
+            //Canvas lastSurface = invoker.undoCanvas.Last();
+
+            //invoker.redoCanvas.Add(lastSurface);
+
+            //invoker.undoCanvas.RemoveAt(invoker.undoCanvas.Count() -1);
+
+            paintSurface.Children.Clear();
+            //foreach (FrameworkElement drawelement in lastSurface.Children)
+            foreach (FrameworkElement drawelement in lastUndo)
+            {
+                paintSurface.Children.Add(drawelement); //add
+            }
+            */
+
+
+
+
+            /*
 
             //shuffle unselected
             Group prevelement = invoker.movedGroups.Last();
@@ -363,6 +389,8 @@ namespace tekenprogramma
                 }
             }
             Repaint(invoker, paintSurface); //repaint   
+
+            */
         }
 
         public void SubUndo(Group selectedgroup,Invoker invoker)
@@ -395,11 +423,35 @@ namespace tekenprogramma
         //redo moving or resizing
         public void Redo(Invoker invoker, Canvas paintSurface)
         {
+
+            List<FrameworkElement> lastRedo = invoker.redoElementsList.Last();
+            invoker.undoElementsList.Add(lastRedo);
+            invoker.redoElementsList.RemoveAt(invoker.redoElementsList.Count() - 1);
+            paintSurface.Children.Clear();
+            foreach (FrameworkElement drawelement in lastRedo)
+            {
+                paintSurface.Children.Add(drawelement); //add
+            }
+            /*
+            Canvas lastSurface = invoker.redoCanvas.Last();
+
+            invoker.undoCanvas.Add(lastSurface);
+
+            invoker.redoCanvas.RemoveAt(invoker.redoCanvas.Count() - 1);
+
+            paintSurface.Children.Clear();
+            foreach (FrameworkElement drawelement in lastSurface.Children)
+            {
+                paintSurface.Children.Add(drawelement); //add
+            }
+            */
+
+
             //Group selectedgroup = invoker.removedGroups.Last();
             //invoker.removedGroups.RemoveAt(invoker.removedGroups.Count() - 1);
             //invoker.movedGroups.Add(selectedgroup);
             //invoker.selectedGroups.RemoveAt(invoker.selectedGroups.Count() - 1); //remove selected
-
+            /*
             //shuffle selected
             Group nextelement = invoker.undoGroups.Last();
             invoker.unselectedGroups.Add(nextelement); //2b+
@@ -443,7 +495,8 @@ namespace tekenprogramma
                     //invoker.movedElements.Add(removedElement);
                 }
             }
-            Repaint(invoker, paintSurface); //repaint   
+            Repaint(invoker, paintSurface); //repaint  
+            */
         }
 
         public void SubRedo(Group selectedgroup,Invoker invoker)
@@ -483,12 +536,13 @@ namespace tekenprogramma
         //resize
         public void Resize(Invoker invoker, PointerRoutedEventArgs e, Canvas paintSurface, FrameworkElement selectedelement)
         {
-            //FrameworkElement selectedelement = invoker.selectElementsList.Last();
+
+            //prepare undo
+            PrepareUndo(invoker);
+            //resizing
             Group selectedgroup = invoker.selectedGroups.Last();
             invoker.removedGroups.Add(selectedgroup);
             //calculate difference in size
-            //double newWidth = ReturnSmallest(e.GetCurrentPoint(paintSurface).Position.X, Convert.ToDouble(element.ActualOffset.X));
-            //double newHeight = ReturnSmallest(e.GetCurrentPoint(paintSurface).Position.Y, Convert.ToDouble(element.ActualOffset.Y));
             double newWidth = ReturnSmallest(e.GetCurrentPoint(paintSurface).Position.X, Convert.ToDouble(selectedelement.ActualOffset.X));
             double newHeight = ReturnSmallest(e.GetCurrentPoint(paintSurface).Position.Y, Convert.ToDouble(selectedelement.ActualOffset.Y));
             double widthOffset = selectedelement.Width - newWidth;
@@ -506,22 +560,9 @@ namespace tekenprogramma
                     invoker.executer++; //acceskey add
                     FrameworkElement madeElement = ResizingElement(movedElement, invoker, paintSurface, location);
                     selectedgroup.movedElements.Add(madeElement);
-                    //this.drawnElements.RemoveAt(this.drawnElements.Count() -1);
-                    //selectedgroup.drawnElements.Add(madeElement);
                 }
                 //selectedgroup.drawnElements.Clear();
             }
-            //if (selectedgroup.movedElements.Count() > 0)
-            //{
-            //    foreach (FrameworkElement drewElement in selectedgroup.movedElements)
-            //    {
-            //        selectedgroup.drawnElements.Add(drewElement);
-            //    }
-            //}
-
-            //remove selected element
-            //invoker.unselectElementsList.Add(selectedelement);
-            //invoker.selectElementsList.RemoveAt(invoker.selectElementsList.Count() - 1);
 
             if (selectedgroup.addedGroups.Count() > 0)
             {
@@ -564,7 +605,22 @@ namespace tekenprogramma
             }
         }
 
+        /*
+        //repaint canvas
+        public void RepaintCanvas(Invoker invoker, Canvas paintSurface, Canvas paintCanvas)
+        {
+            paintSurface.Children.Clear();
 
+            foreach()
+
+            
+            foreach (FrameworkElement drawelement in invoker.drawnElements)
+            {
+                paintSurface.Children.Add(drawelement); //add
+            }
+            
+        }
+        */
 
         //repaint
         public void Repaint(Invoker invoker, Canvas paintSurface)

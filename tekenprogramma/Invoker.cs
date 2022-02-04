@@ -46,6 +46,12 @@ namespace tekenprogramma
         public List<Group> undoGroups = new List<Group>(); //4a
         public List<Group> redoGroups = new List<Group>(); //4b
 
+        public List<Canvas> undoCanvas = new List<Canvas>();
+        public List<Canvas> redoCanvas = new List<Canvas>();
+
+        public List<List<FrameworkElement>> undoElementsList = new List<List<FrameworkElement>>(); //4a
+        public List<List<FrameworkElement>> redoElementsList = new List<List<FrameworkElement>>(); //4b
+
         public int counter = 0;
         public int executer = 0;
 
