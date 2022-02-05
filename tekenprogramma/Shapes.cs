@@ -293,11 +293,13 @@ namespace tekenprogramma
             {
                 paintSurface.Children.Add(drawelement); //add
             }
-            /*
+
             //shuffle unselected
-            prevelement = invoker.movedElements.Last();
+            //prevelement = invoker.movedElements.Last();
+            prevelement = invoker.unselectElements.Last();
             invoker.unselectElements.RemoveAt(invoker.unselectElements.Count() - 1); //2b-
             invoker.selectElements.Add(prevelement); //2a+
+            /*
             //shuffle moved
             nextelement = invoker.unmovedElements.Last();
             invoker.movedElements.RemoveAt(invoker.movedElements.Count() - 1); //3a-
@@ -326,11 +328,14 @@ namespace tekenprogramma
             {
                 paintSurface.Children.Add(drawelement); //add
             }
-            /*
+
             //shuffle selected
-            nextelement = invoker.undoElements.Last();
+            //nextelement = invoker.undoElements.Last();
+            nextelement = invoker.selectElements.Last();
             invoker.unselectElements.Add(nextelement); //2b+
             invoker.selectElements.RemoveAt(invoker.selectElements.Count() - 1); //2a-
+
+            /*
             //shuffle moved
             prevelement = invoker.redoElements.Last();
             invoker.movedElements.Add(prevelement); //3a+
