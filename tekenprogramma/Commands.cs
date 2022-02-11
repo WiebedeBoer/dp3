@@ -184,9 +184,6 @@ namespace tekenprogramma
         }
     }
 
-
-
-
     //class saving
     public class Saved : ICommand
     {
@@ -208,12 +205,12 @@ namespace tekenprogramma
 
         public void Undo()
         {
-            //this.paintSurface.Children.Clear();
+            //placeholder
         }
 
         public void Redo()
         {
-            //this.paintSurface.Children.Clear();
+            //placeholder
         }
     }
 
@@ -237,12 +234,12 @@ namespace tekenprogramma
 
         public void Undo()
         {
-            //this.paintSurface.Children.Clear();
+            //placeholder
         }
 
         public void Redo()
         {
-            //this.paintSurface.Children.Clear();
+            //placeholder
         }
     }
 
@@ -252,16 +249,13 @@ namespace tekenprogramma
         private Group mycommand;
         private Canvas selectedCanvas;
         private Invoker invoker;
-        //private FrameworkElement element;
 
-        //public MakeGroup(Group mycommand, Canvas selectedCanvas, Invoker invoker, FrameworkElement element)
         public MakeGroup(Group mycommand, Canvas selectedCanvas, Invoker invoker)
         {
             
             this.mycommand = mycommand;
             this.selectedCanvas = selectedCanvas;
             this.invoker = invoker;
-            //this.element = element;
         }
 
         public void Execute()
@@ -271,7 +265,6 @@ namespace tekenprogramma
 
         public void Undo()
         {
-            //this.mycommand.UnGroup(this.mycommand, this.selectedCanvas, this.invoker,this.element);
             this.mycommand.UnGroup(this.selectedCanvas, this.invoker);
         }
 
@@ -348,67 +341,5 @@ namespace tekenprogramma
             this.mycommand.Redo(this.invoker, this.paintSurface);
         }
     }
-
-    /*
-    //class load group
-    public class LoadGroup : ICommand
-    {
-        private Group mycommand;
-        private Canvas selectedCanvas;
-        private Invoker invoker;
-
-        public LoadGroup(Group mycommand, Canvas selectedCanvas, Invoker invoker)
-        {
-            this.mycommand = mycommand;
-            this.selectedCanvas = selectedCanvas;
-            this.invoker = invoker;
-        }
-
-        public void Execute()
-        {
-            this.mycommand.LoadGroup(this.mycommand, this.selectedCanvas, this.invoker);
-        }
-
-        public void Undo()
-        {
-            this.mycommand.UnloadGroup(this.selectedCanvas, this.invoker);
-        }
-
-        public void Redo()
-        {
-            this.mycommand.ReloadGroup(this.selectedCanvas, this.invoker);
-        }
-    }
-    */
-
-    ////class select
-    //public class Deselect : ICommand
-    //{
-
-    //    private PointerRoutedEventArgs e;
-    //    private Shape shape;
-    //    private Invoker invoker;
-
-    //    public Deselect(Shape shape, PointerRoutedEventArgs e, Invoker invoker)
-    //    {
-    //        this.e = e;
-    //        this.shape = shape;
-    //    }
-
-    //    public void Execute()
-    //    {
-    //        this.shape.Deselect(this.invoker, this.e);
-    //    }
-
-    //    public void Undo()
-    //    {
-    //        this.shape.Select(this.invoker, this.e);
-    //    }
-
-    //    public void Redo()
-    //    {
-    //        this.shape.Deselect(this.invoker, this.e);
-    //    }
-    //}
 
 }

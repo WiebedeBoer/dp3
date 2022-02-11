@@ -32,9 +32,6 @@ namespace tekenprogramma
         public FrameworkElement nextelement; //next element
         public FrameworkElement selectedElement; //selected element
 
-        //public List<FrameworkElement> movedElements = new List<FrameworkElement>();
-        //public List<FrameworkElement> unmovedElements = new List<FrameworkElement>();
-
         //file IO
         public string fileText { get; set; }
 
@@ -122,7 +119,7 @@ namespace tekenprogramma
         {
             //prepare undo
             PrepareUndo(invoker);
-
+            //create
             Rectangle newRectangle = new Rectangle(); //instance of new rectangle shape
             newRectangle.AccessKey = invoker.executer.ToString(); //access key
             newRectangle.Width = width; //set width
@@ -143,7 +140,7 @@ namespace tekenprogramma
         {
             //prepare undo
             PrepareUndo(invoker);
-
+            //create
             Ellipse newEllipse = new Ellipse(); //instance of new ellipse shape
             newEllipse.AccessKey = invoker.executer.ToString(); //access key
             newEllipse.Width = width; //set width
@@ -175,27 +172,11 @@ namespace tekenprogramma
             {
                 paintSurface.Children.Add(drawelement); //add
             }
-            /*
-            //remove previous
-            prevelement = invoker.drawnElements.Last(); //1f  //err 3
-            invoker.removedElements.Add(prevelement); //0+
-            invoker.drawnElements.RemoveAt(invoker.drawnElements.Count() - 1); //1-
-            //repaint surface
-            Repaint(invoker, paintSurface, false);
-            */
         }
 
         //redo create, state 1
         public void Add(Invoker invoker, Canvas paintSurface)
         {
-            /*
-            //create next
-            nextelement = invoker.removedElements.Last(); //0f
-            invoker.drawnElements.Add(nextelement); //1+
-            invoker.removedElements.RemoveAt(invoker.removedElements.Count() - 1); //0-
-            //repaint surface
-            Repaint(invoker, paintSurface, false);
-            */
             List<FrameworkElement> lastRedo = invoker.redoElementsList.Last();
             invoker.undoElementsList.Add(lastRedo);
             invoker.redoElementsList.RemoveAt(invoker.redoElementsList.Count() - 1);
@@ -215,15 +196,12 @@ namespace tekenprogramma
         {
             //prepare undo
             PrepareUndo(invoker);
-
             //remove selected element from drawn
             KeyNumber(clickedelement, invoker); //1-
             //add selected to unselect
             invoker.unselectElements.Add(clickedelement); //2b+
             //remove from selected
             invoker.selectElements.RemoveAt(invoker.selectElements.Count() - 1); //2a-
-            //add to moved
-            //invoker.movedElements.Add(clickedelement); //3a+
             //create at new location
             if (clickedelement.Name == "Rectangle")
             {
@@ -239,8 +217,6 @@ namespace tekenprogramma
                 Canvas.SetTop(newRectangle, location.y); //set top position
                 //add new to drawn
                 invoker.drawnElements.Add(newRectangle); //1+
-                //add undo
-                //invoker.unmovedElements.Add(newRectangle); //3b+
             }
             else if (clickedelement.Name == "Ellipse")
             {
@@ -256,8 +232,6 @@ namespace tekenprogramma
                 Canvas.SetTop(newEllipse, location.y);//set top position
                 //add new to drawn
                 invoker.drawnElements.Add(newEllipse); //1+
-                //add undo
-                //invoker.unmovedElements.Add(newEllipse); //3b+
             }
             //repaint surface
             Repaint(invoker, paintSurface, true);
@@ -278,77 +252,44 @@ namespace tekenprogramma
                 inc++;
             }
             invoker.drawnElements.RemoveAt(number);
-            //invoker.removedElements.Add(element);
-            //invoker.movedElements.Add(element);
         }
 
         //move back element, state 2
         public void MoveBack(Invoker invoker, Canvas paintSurface)
         {
+            //shuffle moved
             List<FrameworkElement> lastUndo = invoker.undoElementsList.Last();
             invoker.redoElementsList.Add(lastUndo);
             invoker.undoElementsList.RemoveAt(invoker.undoElementsList.Count() - 1);
+            //repaint
             paintSurface.Children.Clear();
             foreach (FrameworkElement drawelement in lastUndo)
             {
                 paintSurface.Children.Add(drawelement); //add
             }
-
             //shuffle unselected
-            //prevelement = invoker.movedElements.Last();
             prevelement = invoker.unselectElements.Last();
             invoker.unselectElements.RemoveAt(invoker.unselectElements.Count() - 1); //2b-
             invoker.selectElements.Add(prevelement); //2a+
-            /*
-            //shuffle moved
-            nextelement = invoker.unmovedElements.Last();
-            invoker.movedElements.RemoveAt(invoker.movedElements.Count() - 1); //3a-
-            invoker.unmovedElements.RemoveAt(invoker.unmovedElements.Count() - 1); //3b-
-            //add redo
-            invoker.undoElements.Add(nextelement); //4a+
-            invoker.redoElements.Add(prevelement); //4b+
-            //remove and add to drawn
-            KeyNumber(nextelement, invoker); //1-
-            invoker.drawnElements.Add(prevelement); //1+
-            //repaint surface
-            Repaint(invoker, paintSurface, false);
-
-            */
         }
 
         //move back element, state 3
         public void MoveAgain(Invoker invoker, Canvas paintSurface)
         {
-
+            //shuffle moved
             List<FrameworkElement> lastRedo = invoker.redoElementsList.Last();
             invoker.undoElementsList.Add(lastRedo);
             invoker.redoElementsList.RemoveAt(invoker.redoElementsList.Count() - 1);
+            //repaint
             paintSurface.Children.Clear();
             foreach (FrameworkElement drawelement in lastRedo)
             {
                 paintSurface.Children.Add(drawelement); //add
             }
-
             //shuffle selected
-            //nextelement = invoker.undoElements.Last();
             nextelement = invoker.selectElements.Last();
             invoker.unselectElements.Add(nextelement); //2b+
             invoker.selectElements.RemoveAt(invoker.selectElements.Count() - 1); //2a-
-
-            /*
-            //shuffle moved
-            prevelement = invoker.redoElements.Last();
-            invoker.movedElements.Add(prevelement); //3a+
-            invoker.unmovedElements.Add(nextelement); //3b+
-            //undo redo
-            invoker.undoElements.RemoveAt(invoker.undoElements.Count() - 1); ; //4a-
-            invoker.redoElements.RemoveAt(invoker.redoElements.Count() - 1); ; //4b-
-            //remove and add to drawn
-            KeyNumber(prevelement, invoker); //1-
-            invoker.drawnElements.Add(nextelement); //1+
-            //repaint surface
-            Repaint(invoker, paintSurface, false);
-            */
         }
 
         //
@@ -360,15 +301,12 @@ namespace tekenprogramma
         {
             //prepare undo
             PrepareUndo(invoker);
-
             //remove selected element from drawn
             KeyNumber(clickedelement, invoker); //1-
             //add selected to unselect
             invoker.unselectElements.Add(clickedelement); //2b+
             //remove from selected
             invoker.selectElements.RemoveAt(invoker.selectElements.Count() - 1); //2a-
-            //add to moved
-            //invoker.movedElements.Add(clickedelement); //3a+
             //calculate size
             double ex = e.GetCurrentPoint(paintSurface).Position.X;
             double ey = e.GetCurrentPoint(paintSurface).Position.Y;
@@ -391,8 +329,6 @@ namespace tekenprogramma
                 Canvas.SetTop(newRectangle, lh);//set top position
                 //add to drawn
                 invoker.drawnElements.Add(newRectangle); //1+
-                //add undo
-                //invoker.unmovedElements.Add(newRectangle); //3b+
             }
             else if (clickedelement.Name == "Ellipse")
             {
@@ -408,8 +344,6 @@ namespace tekenprogramma
                 Canvas.SetTop(newEllipse, lh);//set top position
                 //add to drawn
                 invoker.drawnElements.Add(newEllipse); //1+
-                //add undo
-                //invoker.unmovedElements.Add(newEllipse); //3b+
             }
             //repaint surface
             Repaint(invoker, paintSurface, true);
@@ -464,7 +398,6 @@ namespace tekenprogramma
             return counter;
         }
 
-
         //check if element in sub group
         public int CheckInSubGroup(Group group, Invoker invoker, FrameworkElement element)
         {
@@ -493,9 +426,6 @@ namespace tekenprogramma
             }
             return counter;
         }
-
-
-
 
         //
         //saving
@@ -566,15 +496,16 @@ namespace tekenprogramma
         {
             //clear previous canvas
             paintSurface.Children.Clear();
-            //clear invoker
+            //clear invoker elements
             invoker.drawnElements.Clear();
             invoker.removedElements.Clear();
             invoker.unmovedElements.Clear();
             invoker.movedElements.Clear();
             invoker.selectElements.Clear();
             invoker.unselectElements.Clear();
-            invoker.undoElements.Clear();
-            invoker.redoElements.Clear();
+            invoker.undoElementsList.Clear();
+            invoker.redoElementsList.Clear();
+            //clear invoker groups
             invoker.drawnGroups.Clear();
             invoker.removedGroups.Clear();
             invoker.movedGroups.Clear();
@@ -583,6 +514,7 @@ namespace tekenprogramma
             invoker.unselectedGroups.Clear();
             invoker.undoGroups.Clear();
             invoker.redoGroups.Clear();
+            //clear invoker numbers
             invoker.executer = 0;
             invoker.counter = 0;
             //read file
