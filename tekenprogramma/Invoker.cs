@@ -18,34 +18,28 @@ namespace tekenprogramma
         public List<ICommand> actionsList = new List<ICommand>();
         public List<ICommand> redoList = new List<ICommand>();
         //elements
-        //state 0
-        public List<FrameworkElement> removedElements = new List<FrameworkElement>(); //0
-        //state 1
+        //state 0, remove draw
+        //public List<FrameworkElement> removedElements = new List<FrameworkElement>(); //0
         public List<FrameworkElement> drawnElements = new List<FrameworkElement>(); //1
-        //state 2
+        public List<List<FrameworkElement>> undoElementsList = new List<List<FrameworkElement>>(); //4a keep track of undone
+        public List<List<FrameworkElement>> redoElementsList = new List<List<FrameworkElement>>(); //4b keep track of redone
+        //state 2, unselect, select
+        //public List<FrameworkElement> unselectElements = new List<FrameworkElement>(); //2b
         public List<FrameworkElement> selectElements = new List<FrameworkElement>(); //2a
-        public List<FrameworkElement> unselectElements = new List<FrameworkElement>(); //2b
-        //state 3
-        public List<FrameworkElement> movedElements = new List<FrameworkElement>(); //3a
-        public List<FrameworkElement> unmovedElements = new List<FrameworkElement>(); //3b
-        //state 4
-        public List<List<FrameworkElement>> undoElementsList = new List<List<FrameworkElement>>(); //4a
-        public List<List<FrameworkElement>> redoElementsList = new List<List<FrameworkElement>>(); //4b
+        public List<List<FrameworkElement>> unselectElementsList = new List<List<FrameworkElement>>(); //4a keep track of undone
+        public List<List<FrameworkElement>> reselectElementsList = new List<List<FrameworkElement>>(); //4b keep track of redone
         //groups
         //state 0
-        public List<Group> removedGroups = new List<Group>(); //0
-        //state 1
-        public List<Group> drawnGroups = new List<Group>(); //1       
+        //public List<Group> removedGroups = new List<Group>(); //0 removed groups
+        public List<Group> drawnGroups = new List<Group>(); //1 drawn groups  
+        public List<List<Group>> undoGroupsList = new List<List<Group>>(); //4a keep track of undone
+        public List<List<Group>> redoGroupsList = new List<List<Group>>(); //4b keep track of redone
         //state 2
-        public List<Group> selectedGroups = new List<Group>(); //2a
-        public List<Group> unselectedGroups = new List<Group>(); //2b
-        //state 3
-        public List<Group> movedGroups = new List<Group>(); //3a
-        public List<Group> unmovedGroups = new List<Group>(); //3b
-        //state 4
-        public List<Group> undoGroups = new List<Group>(); //4a
-        public List<Group> redoGroups = new List<Group>(); //4b
-        //counting numbers
+        //public List<Group> unselectedGroups = new List<Group>(); //2b unselected groups
+        public List<Group> selectedGroups = new List<Group>(); //2a selected groups
+        public List<List<Group>> unselectGroupsList = new List<List<Group>>(); //4a keep track of undone
+        public List<List<Group>> reselectGroupsList = new List<List<Group>>(); //4b keep track of redone
+        //counting numbers for execution and elements
         public int counter = 0;
         public int executer = 0;
 

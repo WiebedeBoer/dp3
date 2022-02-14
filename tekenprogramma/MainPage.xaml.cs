@@ -125,8 +125,8 @@ namespace tekenprogramma
         //moving shape
         private void MovingShape(object sender, PointerRoutedEventArgs e)
         {
-            if (invoker.selectElements.Count() >0)
-            {
+            //if (invoker.selectElements.Count() >0)
+            //{
                 Location location = new Location();
                 location.x = e.GetCurrentPoint(paintSurface).Position.X;
                 location.y = e.GetCurrentPoint(paintSurface).Position.Y;
@@ -135,7 +135,7 @@ namespace tekenprogramma
                 Shape shape = new Shape(location.x, location.y, location.width, location.height);
                 ICommand place = new Moving(shape, invoker, location, paintSurface, selectedElement);
                 this.invoker.Execute(place);
-            }
+            //}
             
 
         }
@@ -143,8 +143,8 @@ namespace tekenprogramma
         //resizing shape
         private void ResizingShape(object sender, PointerRoutedEventArgs e)
         {
-            if (invoker.selectElements.Count() > 0)
-            {
+            //if (invoker.selectElements.Count() > 0)
+            //{
                 Location location = new Location();
                 location.x = Convert.ToDouble(selectedElement.ActualOffset.X);
                 location.y = Convert.ToDouble(selectedElement.ActualOffset.Y);
@@ -153,7 +153,7 @@ namespace tekenprogramma
                 Shape shape = new Shape(location.x, location.y, location.width, location.height);
                 ICommand place = new Resize(shape, invoker, e, location, paintSurface, selectedElement);
                 this.invoker.Execute(place);
-            }
+            //}
 
         }
 
