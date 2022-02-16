@@ -35,9 +35,7 @@ namespace tekenprogramma
 
         private void Drawing_pressed(object sender, PointerRoutedEventArgs e)
         {
-
                 FrameworkElement checkElement = e.OriginalSource as FrameworkElement;
-
                 //canvas elements
                 if (checkElement.Name == "Rectangle")
                 {
@@ -53,27 +51,24 @@ namespace tekenprogramma
                 }
                 //not canvas elements
                 else
-                {
-                    
+                {                   
                     selecting = false;
                     //move
                     if (type == "Move")
                     {
-                        if (invoker.selectedGroups.Count() >0)
+                        if (invoker.unselectGroupsList.Count() >0)
                         {
                             MovingGroup(sender, e);
                         }
                         else
                         {
                             MovingShape(sender, e);
-                        }
-                        
+                        }                       
                     }
                     //resize
                     else if (type == "Resize")
-                    {
-                        
-                        if (invoker.selectedGroups.Count() > 0)
+                    {                        
+                        if (invoker.unselectGroupsList.Count() > 0)
                         {
                             ResizingGroup(sender, e);
                         }
@@ -125,8 +120,8 @@ namespace tekenprogramma
         //moving shape
         private void MovingShape(object sender, PointerRoutedEventArgs e)
         {
-            //if (invoker.selectElements.Count() >0)
-            //{
+            if (invoker.unselectElementsList.Count() >0)
+            {
                 Location location = new Location();
                 location.x = e.GetCurrentPoint(paintSurface).Position.X;
                 location.y = e.GetCurrentPoint(paintSurface).Position.Y;
@@ -135,16 +130,14 @@ namespace tekenprogramma
                 Shape shape = new Shape(location.x, location.y, location.width, location.height);
                 ICommand place = new Moving(shape, invoker, location, paintSurface, selectedElement);
                 this.invoker.Execute(place);
-            //}
-            
-
+            }
         }
 
         //resizing shape
         private void ResizingShape(object sender, PointerRoutedEventArgs e)
         {
-            //if (invoker.selectElements.Count() > 0)
-            //{
+            if (invoker.unselectElementsList.Count() > 0)
+            {
                 Location location = new Location();
                 location.x = Convert.ToDouble(selectedElement.ActualOffset.X);
                 location.y = Convert.ToDouble(selectedElement.ActualOffset.Y);
@@ -153,8 +146,7 @@ namespace tekenprogramma
                 Shape shape = new Shape(location.x, location.y, location.width, location.height);
                 ICommand place = new Resize(shape, invoker, e, location, paintSurface, selectedElement);
                 this.invoker.Execute(place);
-            //}
-
+            }
         }
 
         //
@@ -164,25 +156,23 @@ namespace tekenprogramma
         //moving group
         private void MovingGroup(object sender, PointerRoutedEventArgs e)
         {
-            if (invoker.selectElements.Count() > 0)
+            if (invoker.unselectGroupsList.Count() > 0)
             {
                 Group group = new Group(0, 0, 0, 0, "group", 0, 0, paintSurface, invoker, selectedElement);
                 ICommand place = new MoveGroup(group, e, paintSurface, invoker, selectedElement);
                 this.invoker.Execute(place);
             }
-
         }
 
         //resizing group
         private void ResizingGroup(object sender, PointerRoutedEventArgs e)
         {
-            if (invoker.selectElements.Count() > 0)
+            if (invoker.unselectGroupsList.Count() > 0)
             {
                 Group group = new Group(0, 0, 0, 0, "group", 0, 0, paintSurface, invoker, selectedElement);
                 ICommand place = new ResizeGroup(group, e, paintSurface, invoker, selectedElement);
                 this.invoker.Execute(place);
             }
-
         }
 
         //
@@ -236,7 +226,7 @@ namespace tekenprogramma
         //group click
         private void Group_Click(object sender, RoutedEventArgs e)
         {
-            if (invoker.selectElements.Count() > 0)
+            if (invoker.unselectElementsList.Count() > 0)
             {
                 FrameworkElement button = e.OriginalSource as FrameworkElement;
                 type = button.Name;
@@ -245,7 +235,6 @@ namespace tekenprogramma
                 this.invoker.Execute(place);
                 grouping = true;
             }
-
         }
 
         //undo click
