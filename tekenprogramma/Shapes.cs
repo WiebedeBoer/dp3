@@ -79,7 +79,7 @@ namespace tekenprogramma
         public void Deselect(Invoker invoker, Canvas paintSurface)
         {
             //fetch
-            List<FrameworkElement> lastRedo = invoker.unselectElementsList.Last();
+            List<FrameworkElement> lastRedo = invoker.unselectElementsList.Last(); //err
             //shuffle
             invoker.reselectElementsList.Add(lastRedo);
             invoker.unselectElementsList.RemoveAt(invoker.unselectElementsList.Count - 1);
