@@ -650,17 +650,35 @@ namespace tekenprogramma
                             Group group = new Group(0, 0, 0, 0, "group", 0, 0, paintSurface, invoker, selectedElement);
                             ICommand place = new MakeGroup(group, paintSurface, invoker);
                             invoker.Execute(place);
-                            selectgroupscount++;
+                            selectshapescount = 0;                           
                         }
 
                     }
                     //then the others depths
                     else
                     {
-                        if (splitline[0] == "group")
+                        int thingsInGroup = 0;
+                        if (splitline[0] == "group" && tabsremovedlength == tabdepth)
                         {
-                            int elementsInGroup = Convert.ToInt32(splitline[1]);
+                            thingsInGroup = Convert.ToInt32(splitline[1]);                            
+                            Group clickedGroup = invoker.undoGroupsList[selectgroupscount].Last();
+                            selectgroupscount++;
+                            FrameworkElement clickedElement = clickedGroup.undoElementsList[0].Last();
+                            Shape shape = new Shape(clickedElement.ActualOffset.X, clickedElement.ActualOffset.Y, 50, 50);
+                            ICommand place = new Select(shape, clickedElement, invoker, paintSurface);
+                            invoker.Execute(place);
+                            selectshapescount++;
+                            //create group
+                            if (tabsremovedlength < tabsprevious)
+                            {
+                                Group group = new Group(0, 0, 0, 0, "group", 0, 0, paintSurface, invoker, selectedElement);
+                                ICommand gplace = new MakeGroup(group, paintSurface, invoker);
+                                invoker.Execute(gplace);
+                                selectshapescount = 0;
+                                selectgroupscount--;
+                            }
                         }
+
                     }
                     //reset tabs
                     tabsprevious = tabsremovedlength;
