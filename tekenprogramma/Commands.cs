@@ -155,14 +155,14 @@ namespace tekenprogramma
     public class Select : ICommand
     {
 
-        private PointerRoutedEventArgs e;
+        private FrameworkElement element;
         private Shape shape;
         private Invoker invoker;
         private Canvas paintSurface;
 
-        public Select(Shape shape, PointerRoutedEventArgs e,Invoker invoker, Canvas paintSurface)
+        public Select(Shape shape, FrameworkElement clickedElement, Invoker invoker, Canvas paintSurface)
         {
-            this.e = e;
+            this.element = clickedElement;
             this.shape = shape;
             this.invoker = invoker;
             this.paintSurface = paintSurface;
@@ -170,7 +170,7 @@ namespace tekenprogramma
 
         public void Execute()
         {
-            this.shape.Select(this.e, this.invoker, this.paintSurface);
+            this.shape.Select(this.element, this.invoker, this.paintSurface);
         }
 
         public void Undo()

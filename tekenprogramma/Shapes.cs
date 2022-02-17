@@ -51,10 +51,8 @@ namespace tekenprogramma
         //
 
         // Selects the shape, state 2
-        public void Select(PointerRoutedEventArgs e, Invoker invoker, Canvas paintSurface)
+        public void Select(FrameworkElement selectedElement, Invoker invoker, Canvas paintSurface)
         {
-            //fetch
-            selectedElement = e.OriginalSource as FrameworkElement;//2af
             //opacity
             selectedElement.Opacity = 0.6; //fill opacity
             //if not first selected
@@ -604,29 +602,23 @@ namespace tekenprogramma
                     }
                 }
             }
-            //select shapes and make groups, start at deepest shapes
-            int tabsremovedlength = 0;
-            int tabsprevious = 0;
-            int allshapescount = 0;
-            int selectshapescount = 0;
-            int selectgroupscount = 0;
+
+
             //loop through, start at deepest
             for (int tabdepth = maxtab; tabdepth >=0; tabdepth--)
             {
+                //select shapes and make groups, start at deepest shapes
+                int tabsremovedlength = 0;
+                int tabsprevious = 0;
+                int allshapescount = 0;
+                int selectshapescount = 0;
+                int selectgroupscount = 0;
                 foreach (string st in readText)
                 {
                     //prepare lines
                     string notabsline = st.Replace("\t", "");
                     string[] splitline = Regex.Split(notabsline, "\\s+");
-                    //check the shape number
-                    if (splitline[0] == "ellipse")
-                    {
-                        allshapescount++;
-                    }
-                    else if (splitline[0] == "rectangle")
-                    {
-                        allshapescount++;
-                    }
+
                     //check max length
                     tabsremovedlength = (st.Length - notabsline.Length);
                     //first the deepest
@@ -637,25 +629,27 @@ namespace tekenprogramma
                         {
                             if (splitline[0] == "ellipse")
                             {
-                                //Shape shape = new Shape(e.GetCurrentPoint(paintSurface).Position.X, e.GetCurrentPoint(paintSurface).Position.Y, 50, 50);
-                                //ICommand place = new Select(shape, e, this.invoker, paintSurface);
-                                //this.invoker.Execute(place);
+                                FrameworkElement clickedElement = invoker.undoElementsList[allshapescount].Last();
+                                Shape shape = new Shape(clickedElement.ActualOffset.X, clickedElement.ActualOffset.Y, 50, 50);
+                                ICommand place = new Select(shape, clickedElement, invoker, paintSurface);
+                                invoker.Execute(place);
                                 selectshapescount++;
                             }
                             else if (splitline[0] == "rectangle")
                             {
-                                //Shape shape = new Shape(e.GetCurrentPoint(paintSurface).Position.X, e.GetCurrentPoint(paintSurface).Position.Y, 50, 50);
-                                //ICommand place = new Select(shape, e, this.invoker, paintSurface);
-                                //this.invoker.Execute(place);
+                                FrameworkElement clickedElement = invoker.undoElementsList[allshapescount].Last();
+                                Shape shape = new Shape(clickedElement.ActualOffset.X, clickedElement.ActualOffset.Y, 50, 50);
+                                ICommand place = new Select(shape, clickedElement, invoker, paintSurface);
+                                invoker.Execute(place);
                                 selectshapescount++;
                             }
                         }
                         //create deepest group
                         if (tabsremovedlength < tabsprevious)
                         {
-                            //Group group = new Group(0, 0, 0, 0, "group", 0, 0, paintSurface, invoker, selectedElement);
-                            //ICommand place = new MakeGroup(group, paintSurface, invoker);
-                            //this.invoker.Execute(place);
+                            Group group = new Group(0, 0, 0, 0, "group", 0, 0, paintSurface, invoker, selectedElement);
+                            ICommand place = new MakeGroup(group, paintSurface, invoker);
+                            invoker.Execute(place);
                             selectgroupscount++;
                         }
 
@@ -663,10 +657,22 @@ namespace tekenprogramma
                     //then the others depths
                     else
                     {
-
+                        if (splitline[0] == "group")
+                        {
+                            int elementsInGroup = Convert.ToInt32(splitline[1]);
+                        }
                     }
                     //reset tabs
                     tabsprevious = tabsremovedlength;
+                    //increment the shape number
+                    if (splitline[0] == "ellipse")
+                    {
+                        allshapescount++;
+                    }
+                    else if (splitline[0] == "rectangle")
+                    {
+                        allshapescount++;
+                    }
                 }
             }
         }       
