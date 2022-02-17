@@ -88,8 +88,8 @@ namespace tekenprogramma
         //make new group
         public void MakeGroup(Group group, Canvas selectedCanvas, Invoker invoker)
         {
-            //variables
-            int newdepth = 0;      
+            //depth variables
+            int newdepth = 0;
             //selected elements
             if(invoker.unselectElementsList.Count() > 0)
             {
@@ -121,50 +121,64 @@ namespace tekenprogramma
                 }
             }
             //new drawn groups
-            List<Group> newGroups = new List<Group>();
-            //check count
-            if (invoker.unselectGroupsList.Count() > 0 && invoker.undoGroupsList.Count() >0)
+            List<Group> leftoverGroups = new List<Group>();
+            //check drawn group count
+            if (invoker.undoGroupsList.Count() > 0)
             {
-                //selected groups removal and shuffling
-                List<Group> selectedGroups = invoker.unselectGroupsList.Last();
                 List<Group> lastGroups = invoker.undoGroupsList.Last();
-                //check count
-                if (selectedGroups.Count() > 0 && lastGroups.Count() > 0)
+                //check drawn group count
+                if (lastGroups.Count() > 0)
                 {
-                    //selected removal
-                    for (int s = 0; s < lastGroups.Count(); s++)
+                    //check selected group count
+                    if (invoker.unselectGroupsList.Count() > 0)
                     {
-                        foreach (Group selectedgroup in selectedGroups)
+                        List<Group> selectedGroups = invoker.unselectGroupsList.Last();
+                        //check selected group count
+                        if (selectedGroups.Count() > 0)
                         {
-                            //removal
-                            if (selectedgroup.id == lastGroups[s].id)
+                            //selected groups removal and shuffling
+                            for (int s = 0; s < lastGroups.Count(); s++)
                             {
-                                lastGroups.RemoveAt(s);
+                                bool checkSelected = false;
+                                foreach (Group selectedgroup in selectedGroups)
+                                {
+                                    //add subgroups to this new group
+                                    if (selectedgroup.id == lastGroups[s].id)
+                                    {
+                                        this.addedGroups.Add(selectedgroup);
+                                        checkSelected = true;
+                                    }                                    
+                                }
+                                //add only non selected groups
+                                if (checkSelected == false)
+                                {
+                                    leftoverGroups.Add(lastGroups[s]);
+                                }
                             }
-                            //add
-                            else
+                            //calculate depth from selected groups
+                            foreach (Group selectedgroup in selectedGroups)
                             {
-                                newGroups.Add(lastGroups[s]);
+                                if (selectedgroup.depth > newdepth)
+                                {
+                                    newdepth = 1 + selectedgroup.depth;
+                                }
                             }
-                        }
-                    }                   
-                    //selected groups
-                    foreach (Group selectedgroup in selectedGroups)
-                    {
-                        //add subgroups to group
-                        this.addedGroups.Add(selectedgroup);
-                        //calculate depth
-                        if (selectedgroup.depth > newdepth)
-                        {
-                            newdepth = newdepth + selectedgroup.depth;
+                            //shuffle selected groups
+                            for (int g = selectedGroups.Count(); g > 0; g--)
+                            {
+                                List<Group> lastSelectedGroups = invoker.unselectGroupsList.Last();
+                                invoker.reselectGroupsList.Add(lastSelectedGroups); //2b+
+                                invoker.unselectGroupsList.RemoveAt(invoker.unselectGroupsList.Count() - 1); //2a-
+                            }
                         }
                     }
-                    //shuffle selected groups
-                    for (int g = selectedGroups.Count(); g > 0; g--)
-                    {                        
-                        List<Group> lastSelectedGroups = invoker.unselectGroupsList.Last();
-                        invoker.reselectGroupsList.Add(lastSelectedGroups); //2b+
-                        invoker.unselectGroupsList.RemoveAt(invoker.unselectGroupsList.Count() - 1); //2a-
+                    //else no other selected, then add all left over groups
+                    else
+                    {
+                        foreach (Group lastGroup in lastGroups)
+                        {
+                            leftoverGroups.Add(lastGroup);
+                        }
                     }
                 }
             }
@@ -173,8 +187,8 @@ namespace tekenprogramma
             //group id
             this.id = invoker.executer;
             //add group
-            newGroups.Add(this);
-            invoker.undoGroupsList.Add(newGroups);
+            leftoverGroups.Add(this);
+            invoker.undoGroupsList.Add(leftoverGroups);
         }
 
         //un group

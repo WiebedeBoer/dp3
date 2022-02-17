@@ -568,16 +568,17 @@ namespace tekenprogramma
             Windows.Storage.StorageFolder storageFolder = Windows.Storage.ApplicationData.Current.LocalFolder;
             Windows.Storage.StorageFile saveFile = await storageFolder.GetFileAsync("dp3data.txt");
             string text = await Windows.Storage.FileIO.ReadTextAsync(saveFile);
-            //load shapes
+            //load shapes and groups
             string[] readText = Regex.Split(text, "\\n+");
-            int i = 0;
-            //make groups and shapes
+            int maxtab = 0;
+            int tabslength = 0;
+            int shapescount = 0;
+            //make shapes
             foreach (string s in readText)
             {
+                //if the line contains something
                 if (s.Length > 2)
                 {
-                    invoker.executer++;
-                    i++;
                     string notabs = s.Replace("\t", "");
                     string[] line = Regex.Split(notabs, "\\s+");
                     //remake shapes
@@ -586,162 +587,88 @@ namespace tekenprogramma
                         Shape shape = new Shape(Convert.ToDouble(line[1]), Convert.ToDouble(line[2]), Convert.ToDouble(line[3]), Convert.ToDouble(line[4]));
                         ICommand place = new MakeEllipses(shape, invoker, paintSurface);
                         invoker.Execute(place);
+                        shapescount++;
                     }
                     else if (line[0] == "rectangle")
                     {
                         Shape shape = new Shape(Convert.ToDouble(line[1]), Convert.ToDouble(line[2]), Convert.ToDouble(line[3]), Convert.ToDouble(line[4]));
                         ICommand place = new MakeRectangles(shape, invoker, paintSurface);
                         invoker.Execute(place);
+                        shapescount++;
                     }
-                    //remake groups
-                    else if (line[0] == "group")
+                    //calculate maximum tabs in lines
+                    tabslength = (s.Length - notabs.Length);
+                    if (tabslength > maxtab)
                     {
-                        FrameworkElement selectedElement = null;
-                        Group group = new Group(0, 0, 0, 0, "group", 0, 0, paintSurface, invoker, selectedElement);
-                        ICommand place = new MakeGroup(group, paintSurface, invoker);
-                        invoker.Execute(place);
-                    }   
+                        maxtab = tabslength;
+                    }
                 }
             }
-            int j = 0; //line increment
-            int g = 0;//group increment
-            //re add elements to groups
-            foreach (string s in readText)
+            //select shapes and make groups, start at deepest shapes
+            int tabsremovedlength = 0;
+            int tabsprevious = 0;
+            int allshapescount = 0;
+            int selectshapescount = 0;
+            int selectgroupscount = 0;
+            //loop through, start at deepest
+            for (int tabdepth = maxtab; tabdepth >=0; tabdepth--)
             {
-                if (s.Length > 2)
-                {   
-                    string notabs = s.Replace("\t", "");
-                    string[] line = Regex.Split(notabs, "\\s+");
-                    if (line[0] == "group")
-                    {
-                        GetGroupElements(readText, j, Convert.ToInt32(line[1]), g, invoker);
-                        g++;
-                    }
-                    j++;
-                }
-            }
-            int maingroup = 0; //main group increment
-            int k = 0; //line increment
-            //remake subgroups and add elements
-            foreach (string s in readText)
-            {
-                if (s.Length > 2)
+                foreach (string st in readText)
                 {
-                    string[] line = Regex.Split(s, "\\s+");
-                    int tabcount = s.Length - s.Replace("/", "").Length;
-
-                    //if (s[0] != '\t')
-                    if (tabcount <0)
-                    { 
-                        if (line[0] == "group")
-                        {                    
-                            GetSubGroups(readText, maingroup, 0, k, k + Convert.ToInt32(line[1]),invoker);
+                    //prepare lines
+                    string notabsline = st.Replace("\t", "");
+                    string[] splitline = Regex.Split(notabsline, "\\s+");
+                    //check the shape number
+                    if (splitline[0] == "ellipse")
+                    {
+                        allshapescount++;
+                    }
+                    else if (splitline[0] == "rectangle")
+                    {
+                        allshapescount++;
+                    }
+                    //check max length
+                    tabsremovedlength = (st.Length - notabsline.Length);
+                    //first the deepest
+                    if (tabdepth == maxtab)
+                    {
+                        //select deepest elements
+                        if (tabsremovedlength == tabdepth)
+                        {
+                            if (splitline[0] == "ellipse")
+                            {
+                                //Shape shape = new Shape(e.GetCurrentPoint(paintSurface).Position.X, e.GetCurrentPoint(paintSurface).Position.Y, 50, 50);
+                                //ICommand place = new Select(shape, e, this.invoker, paintSurface);
+                                //this.invoker.Execute(place);
+                                selectshapescount++;
+                            }
+                            else if (splitline[0] == "rectangle")
+                            {
+                                //Shape shape = new Shape(e.GetCurrentPoint(paintSurface).Position.X, e.GetCurrentPoint(paintSurface).Position.Y, 50, 50);
+                                //ICommand place = new Select(shape, e, this.invoker, paintSurface);
+                                //this.invoker.Execute(place);
+                                selectshapescount++;
+                            }
                         }
+                        //create deepest group
+                        if (tabsremovedlength < tabsprevious)
+                        {
+                            //Group group = new Group(0, 0, 0, 0, "group", 0, 0, paintSurface, invoker, selectedElement);
+                            //ICommand place = new MakeGroup(group, paintSurface, invoker);
+                            //this.invoker.Execute(place);
+                            selectgroupscount++;
+                        }
+
                     }
-                    maingroup++;
-                }
-                k++;
-            }
-        }
-
-        /*
-        //load ellipse
-        public void GetEllipse(String lines, Canvas paintSurface, Invoker invoker)
-        {
-            string[] line = Regex.Split(lines, "\\s+");
-            //location and size
-            double x = Convert.ToDouble(line[1]);
-            double y = Convert.ToDouble(line[2]);
-            double width = Convert.ToDouble(line[3]);
-            double height = Convert.ToDouble(line[4]);
-            //draw
-            Ellipse newEllipse = new Ellipse(); //instance of new ellipse shape
-            newEllipse.AccessKey = invoker.executer.ToString();
-            newEllipse.Width = width;
-            newEllipse.Height = height;
-            SolidColorBrush brush = new SolidColorBrush();//brush
-            brush.Color = Windows.UI.Colors.Blue;//standard brush color is blue
-            newEllipse.Fill = brush;//fill color
-            newEllipse.Name = "Ellipse";//attach name
-            Canvas.SetLeft(newEllipse, x);//set left position
-            Canvas.SetTop(newEllipse, y);//set top position
-            paintSurface.Children.Add(newEllipse);
-            invoker.drawnElements.Add(newEllipse);
-        }
-
-        //load rectangle
-        public void GetRectangle(String lines, Canvas paintSurface, Invoker invoker)
-        {
-            string[] line = Regex.Split(lines, "\\s+");
-            //location and size
-            double x = Convert.ToDouble(line[1]);
-            double y = Convert.ToDouble(line[2]);
-            double width = Convert.ToDouble(line[3]);
-            double height = Convert.ToDouble(line[4]);
-            //draw
-            Rectangle newRectangle = new Rectangle(); //instance of new rectangle shape
-            newRectangle.AccessKey = invoker.executer.ToString();
-            newRectangle.Width = width; //set width
-            newRectangle.Height = height; //set height     
-            SolidColorBrush brush = new SolidColorBrush(); //brush
-            brush.Color = Windows.UI.Colors.Blue; //standard brush color is blue
-            newRectangle.Fill = brush; //fill color
-            newRectangle.Name = "Rectangle"; //attach name
-            Canvas.SetLeft(newRectangle, x); //set left position
-            Canvas.SetTop(newRectangle, y); //set top position 
-            paintSurface.Children.Add(newRectangle);
-            invoker.drawnElements.Add(newRectangle);
-        }
-
-        */
-
-        //re attach element to group
-        public void GetGroupElements(string[] readText, int start, int stop, int group, Invoker invoker)
-        {
-            /*
-            Group attachgroup = invoker.drawnGroups[group];
-            for (int i = start; i < stop; i++)
-            {
-                FrameworkElement elm = invoker.drawnElements[i];
-                attachgroup.drawnElements.Add(elm);
-            }
-            */
-        }
-
-        
-
-        //re attach subgroups to group
-        public void GetSubGroups(string[] readText, int group, int depth, int start, int stop, Invoker invoker)
-        {
-            /*
-            Group maingroup = invoker.drawnGroups[group];
-            while(start < stop)
-            {
-                string s = readText[start];
-                string notabs = s.Replace("\t", "");
-                string tab = "\t";
-                int tablength = tab.Length;
-                int notablength = notabs.Length;
-                int slength = s.Length;
-                int subdepth = (slength - notablength) / tablength;
-
-                if (subdepth == (depth + 1))
-                {
-                    string[] line = Regex.Split(notabs, "\\s+");
-                    if (line[0] == "group")
+                    //then the others depths
+                    else
                     {
-                        group++;
-                        Group subgroup = invoker.drawnGroups[group];
-                        maingroup.addedGroups.Add(subgroup);
-                        invoker.drawnGroups.RemoveAt(group);
 
-                        GetSubGroups(readText, group, depth + 1, start, start + Convert.ToInt32(line[1]), invoker);
                     }
-                    start++;
+                    //reset tabs
+                    tabsprevious = tabsremovedlength;
                 }
             }
-            */
-        }
-        
+        }       
     }
 }

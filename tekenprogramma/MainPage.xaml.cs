@@ -96,7 +96,9 @@ namespace tekenprogramma
         //selecting shape
         private void Selecting(object sender, PointerRoutedEventArgs e, FrameworkElement element)
         {
-            Shape shape = new Shape(e.GetCurrentPoint(paintSurface).Position.X, e.GetCurrentPoint(paintSurface).Position.Y, 50, 50);
+            //Shape shape = new Shape(e.GetCurrentPoint(paintSurface).Position.X, e.GetCurrentPoint(paintSurface).Position.Y, 50, 50);
+            //selectedElement = e.OriginalSource as FrameworkElement;
+            Shape shape = new Shape(element.ActualOffset.X,element.ActualOffset.Y, 50, 50);
             ICommand place = new Select(shape, e, this.invoker, paintSurface);
             this.invoker.Execute(place);
         }
