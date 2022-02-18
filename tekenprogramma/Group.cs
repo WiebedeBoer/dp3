@@ -972,21 +972,18 @@ namespace tekenprogramma
                 {
                     foreach (FrameworkElement child in group.undoElementsList.Last())
                     {
-
                         int j = 0;
                         while (j < newdepth)
                         {
                             str += "\t";
                             j++;
                         }
-                        if (child is Rectangle)
+                        if (child.Name == "Rectangle")
                         {
-
                             str = str + "rectangle " + child.ActualOffset.X + " " + child.ActualOffset.Y + " " + child.Width + " " + child.Height + "\n";
                         }
                         else
                         {
-
                             str = str + "ellipse " + child.ActualOffset.X + " " + child.ActualOffset.Y + " " + child.Width + " " + child.Height + "\n";
                         }
                     }

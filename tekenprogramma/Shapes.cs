@@ -602,96 +602,64 @@ namespace tekenprogramma
                     }
                 }
             }
-
-
-            //loop through, start at deepest
+            //loop through and make groups, start at deepest
             for (int tabdepth = maxtab; tabdepth >=0; tabdepth--)
             {
                 //select shapes and make groups, start at deepest shapes
                 int tabsremovedlength = 0;
                 int tabsprevious = 0;
                 int allshapescount = 0;
-                int selectshapescount = 0;
-                int selectgroupscount = 0;
+                int thingsInGroup = 0;
+                int skipInGroup = 0;
                 foreach (string st in readText)
                 {
                     //prepare lines
                     string notabsline = st.Replace("\t", "");
                     string[] splitline = Regex.Split(notabsline, "\\s+");
-
-                    //check max length
                     tabsremovedlength = (st.Length - notabsline.Length);
-                    //first the deepest
-                    if (tabdepth == maxtab)
-                    {
-                        //select deepest elements
-                        if (tabsremovedlength == tabdepth)
-                        {
-                            if (splitline[0] == "ellipse")
-                            {
-                                FrameworkElement clickedElement = invoker.undoElementsList[allshapescount].Last();
-                                Shape shape = new Shape(clickedElement.ActualOffset.X, clickedElement.ActualOffset.Y, 50, 50);
-                                ICommand place = new Select(shape, clickedElement, invoker, paintSurface);
-                                invoker.Execute(place);
-                                selectshapescount++;
-                            }
-                            else if (splitline[0] == "rectangle")
-                            {
-                                FrameworkElement clickedElement = invoker.undoElementsList[allshapescount].Last();
-                                Shape shape = new Shape(clickedElement.ActualOffset.X, clickedElement.ActualOffset.Y, 50, 50);
-                                ICommand place = new Select(shape, clickedElement, invoker, paintSurface);
-                                invoker.Execute(place);
-                                selectshapescount++;
-                            }
-                        }
-                        //create deepest group
-                        if (tabsremovedlength < tabsprevious)
-                        {
-                            Group group = new Group(0, 0, 0, 0, "group", 0, 0, paintSurface, invoker, selectedElement);
-                            ICommand place = new MakeGroup(group, paintSurface, invoker);
-                            invoker.Execute(place);
-                            selectshapescount = 0;                           
-                        }
 
-                    }
-                    //then the others depths
-                    else
+                    //fetch group
+                    if (splitline[0] == "group" && tabsremovedlength == tabdepth)
                     {
-                        int thingsInGroup = 0;
-                        if (splitline[0] == "group" && tabsremovedlength == tabdepth)
+                        thingsInGroup = Convert.ToInt32(splitline[1]);
+                        tabsprevious = tabdepth;
+                    }
+                    //skip if subgroup
+                    else if (splitline[0] == "group" && tabsremovedlength > tabdepth)
+                    {
+                        int convertedSkips = Convert.ToInt32(splitline[1]);
+                        skipInGroup = skipInGroup + (convertedSkips - 1);
+                    }
+                    //select the elements
+                    else if (splitline[0] == "ellipse" || splitline[0] == "rectangle") 
+                    {
+
+                        //decrement skip in group
+                        if (skipInGroup >=1)
                         {
-                            thingsInGroup = Convert.ToInt32(splitline[1]);                            
-                            Group clickedGroup = invoker.undoGroupsList[selectgroupscount].Last();
-                            selectgroupscount++;
-                            FrameworkElement clickedElement = clickedGroup.undoElementsList[0].Last();
+                            skipInGroup--;
+                        }
+                        else if (skipInGroup ==0 && thingsInGroup >= 1 && tabsremovedlength > tabsprevious)
+                        {
+                            //select the element
+                            FrameworkElement clickedElement = invoker.undoElementsList[allshapescount].Last();
                             Shape shape = new Shape(clickedElement.ActualOffset.X, clickedElement.ActualOffset.Y, 50, 50);
                             ICommand place = new Select(shape, clickedElement, invoker, paintSurface);
                             invoker.Execute(place);
-                            selectshapescount++;
-                            //create group
-                            if (tabsremovedlength < tabsprevious)
+                            thingsInGroup--;
+                            //make the group
+                            if (thingsInGroup == 0)
                             {
                                 Group group = new Group(0, 0, 0, 0, "group", 0, 0, paintSurface, invoker, selectedElement);
                                 ICommand gplace = new MakeGroup(group, paintSurface, invoker);
                                 invoker.Execute(gplace);
-                                selectshapescount = 0;
-                                selectgroupscount--;
+                                tabsprevious = 0;
                             }
                         }
-
-                    }
-                    //reset tabs
-                    tabsprevious = tabsremovedlength;
-                    //increment the shape number
-                    if (splitline[0] == "ellipse")
-                    {
+                        //increment shape number
                         allshapescount++;
-                    }
-                    else if (splitline[0] == "rectangle")
-                    {
-                        allshapescount++;
-                    }
-                }
+                    }                                     
+                }                
             }
         }       
     }
